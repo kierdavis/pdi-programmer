@@ -6,6 +6,8 @@
 #include "Util.hpp"
 
 namespace PDI {
+  static constexpr uint32_t BAUD_RATE = 2000000;
+
   class RecvResult {
   public:
     Util::Status status;

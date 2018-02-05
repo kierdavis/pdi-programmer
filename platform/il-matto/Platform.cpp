@@ -3,6 +3,7 @@
 
 #include <avr/io.h>
 
+#include "PDI.hpp"
 #include "PDIPin.hpp"
 #include "Platform.hpp"
 
