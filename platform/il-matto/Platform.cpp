@@ -28,7 +28,7 @@ static uint8_t pinMask(PDIPin pin) {
 }
 
 void Platform::Pin::configureAsOutput(PDIPin pin, bool initialState) {
-  setOutput(pin, initialState);
+  Platform::Pin::write(pin, initialState);
   *DDR |= pinMask(pin);
 }
 
