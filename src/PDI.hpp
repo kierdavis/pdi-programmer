@@ -16,6 +16,7 @@ namespace PDI {
 
   void init();
   void begin();
+  void end();
   void send(uint8_t byte);
   RecvResult recv();
 }
