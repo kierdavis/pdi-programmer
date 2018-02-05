@@ -83,7 +83,7 @@ static void ensureTransmitMode() {
 }
 
 static void ensureReceiveMode() {
-  if (mode != mode::RECEIVING) {
+  if (mode != Mode::RECEIVING) {
     // Wait for transmissions to complete.
     while (!Platform::Serial::txComplete()) {}
 
