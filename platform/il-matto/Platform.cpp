@@ -45,7 +45,7 @@ void Platform::Pin::write(PDIPin pin, bool state) {
   }
 }
 
-void Platform::Pin::read(PDIPin pin) {
+bool Platform::Pin::read(PDIPin pin) {
   return *PIN & pinMask(pin);
 }
 
