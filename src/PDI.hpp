@@ -12,7 +12,7 @@ namespace PDI {
   public:
     Util::Status status;
     uint8_t data;
-    RecvResult(Util::Status status_, uint8_t data_)
+    RecvResult(Util::Status status_ = Util::Status::UNKNOWN_ERROR, uint8_t data_ = 0)
       : status(status_), data(data_) {}
   };
 
