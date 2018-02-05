@@ -74,7 +74,7 @@ static void ensureTransmitMode() {
 
     Platform::Pin::configureAsOutput(PDIPin::TXD, true);
 
-    Platform::Serial::resetTxComplete();
+    // Platform::Serial::resetTxComplete();
     Platform::Serial::enableTx();
     Platform::Serial::disableRx();
 
