@@ -106,6 +106,8 @@ void PDI::send(uint8_t byte) {
 }
 
 PDI::RecvResult PDI::recv() {
+  // TODO: timeout
+
   ensureReceiveMode();
 
   while (!Platform::Serial::rxComplete()) {}
