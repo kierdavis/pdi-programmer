@@ -86,8 +86,8 @@ static void ensureReceiveMode() {
   if (mode != Mode::RECEIVING) {
     // Wait for transmissions to complete.
     while (!Platform::Serial::txComplete()) {}
-
     Platform::Serial::resetTxComplete();
+
     Platform::Serial::enableRx();
     Platform::Serial::disableTx();
 
