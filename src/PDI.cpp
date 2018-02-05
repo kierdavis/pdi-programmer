@@ -92,6 +92,8 @@ static void ensureReceiveMode() {
     Platform::Serial::disableTx();
 
     Platform::Pin::configureAsInput(PDIPin::TXD);
+
+    mode = Mode::RECEIVING;
   }
 }
 
