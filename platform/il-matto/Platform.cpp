@@ -6,9 +6,9 @@
 #include "PDIPin.hpp"
 #include "Platform.hpp"
 
-static volatile uint8_t * const DDR = DDRD;
-static volatile uint8_t * const PORT = PORTD;
-static volatile uint8_t * const PIN = PIND;
+static volatile uint8_t * const DDR = &DDRD;
+static volatile uint8_t * const PORT = &PORTD;
+static volatile uint8_t * const PIN = &PIND;
 
 static const uint8_t CLK_INDEX = 4;
 static const uint8_t TXD_INDEX = 3;
@@ -28,24 +28,24 @@ static uint8_t pinMask(PDIPin pin) {
 
 void Platform::Pin::configureAsOutput(PDIPin pin, bool initialState) {
   setOutput(pin, initialState);
-  DDR |= pinMask(pin);
+  *DDR |= pinMask(pin);
 }
 
 void Platform::Pin::configureAsInput(PDIPin pin) {
-  PORT &= ~pinMask(pin);
-  DDR &= ~pinMask(pin);
+  *PORT &= ~pinMask(pin);
+  *DDR &= ~pinMask(pin);
 }
 
 void Platform::Pin::write(PDIPin pin, bool state) {
   if (state) {
-    PORT |= pinMask(pin);
+    *PORT |= pinMask(pin);
   } else {
-    PORT &= ~pinMask(pin);
+    *PORT &= ~pinMask(pin);
   }
 }
 
 void Platform::Pin::read(PDIPin pin) {
-  return PIN & pinMask(pin);
+  return *PIN & pinMask(pin);
 }
 
 void Platform::Serial::init() {
