@@ -23,6 +23,7 @@ static uint8_t pinMask(PDIPin pin) {
     case PDIPin::CLK: return CLK_MASK;
     case PDIPin::TXD: return TXD_MASK;
     case PDIPin::RXD: return RXD_MASK;
+    default:          return 0; // unreachable
   }
 }
 
