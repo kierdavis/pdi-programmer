@@ -50,7 +50,7 @@ bool Platform::Pin::read(PDIPin pin) {
 }
 
 void Platform::Serial::init() {
-  UBBR1 = (F_CPU / (2 * PDI::BAUD_RATE)) - 1;
+  UBRR1 = (F_CPU / (2 * PDI::BAUD_RATE)) - 1;
   UCSR1A = 0;
   UCSR1B = 0;
   UCSR1C = _BV(UPM11) | _BV(USBS1) | _BV(UCSZ11) | _BV(UCSZ10) | _BV(UCPOL1);
