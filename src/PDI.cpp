@@ -159,6 +159,12 @@ void PDI::Instruction::sts41(uint32_t addr, uint8_t data) {
   PDI::Link::send(data);
 }
 
+Util::MaybeUint8 PDI::Instruction::ld1(PDI::PtrMode pm) {
+  uint8_t pmMask = ((uint8_t) pm) & 0xC;
+  PDI::Link::send(0x20 | pmMask);
+  return PDI::Link::recv();
+}
+
 void PDI::Instruction::st4(PDI::PtrMode pm, uint32_t data) {
   uint8_t pmMask = ((uint8_t) pm) & 0xC;
   PDI::Link::send(0x63 | pmMask);
