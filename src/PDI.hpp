@@ -16,6 +16,7 @@ namespace PDI {
 
   namespace Link {
     void send(uint8_t byte);
+    void send2(uint16_t data);
     void send4(uint32_t data);
     Util::MaybeUint8 recv();
   }

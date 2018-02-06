@@ -104,6 +104,16 @@ void PDI::Link::send(uint8_t byte) {
   Platform::Serial::writeData(byte);
 }
 
+void PDI::Link::send2(uint16_t data) {
+  union {
+    uint16_t word;
+    uint8_t bytes[2];
+  } u;
+  u.word = data;
+  PDI::Link::send(u.bytes[0]);
+  PDI::Link::send(u.bytes[1]);
+}
+
 void PDI::Link::send4(uint32_t data) {
   union {
     uint32_t word;
