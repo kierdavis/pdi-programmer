@@ -13,10 +13,12 @@ namespace PDI {
   void init();
   void begin();
   void end();
-  void send(uint8_t byte);
-  Util::MaybeUint8 recv();
 
-  void send4(uint32_t data);
+  namespace Link {
+    void send(uint8_t byte);
+    void send4(uint32_t data);
+    Util::MaybeUint8 recv();
+  }
 
   enum class CSReg : uint8_t {
     STATUS = 0,

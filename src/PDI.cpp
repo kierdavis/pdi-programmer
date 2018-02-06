@@ -96,7 +96,7 @@ void PDI::end() {
   Platform::Pin::configureAsInput(PDIPin::RXD);
 }
 
-void PDI::send(uint8_t byte) {
+void PDI::Link::send(uint8_t byte) {
   ensureTransmitMode();
 
   while (!Platform::Serial::txBufferEmpty()) {}
@@ -104,16 +104,16 @@ void PDI::send(uint8_t byte) {
   Platform::Serial::writeData(byte);
 }
 
-void PDI::send4(uint32_t data) {
+void PDI::Link::send4(uint32_t data) {
   union {
     uint32_t word;
     uint8_t bytes[4];
   } u;
   u.word = data;
-  PDI::send(u.bytes[0]);
-  PDI::send(u.bytes[1]);
-  PDI::send(u.bytes[2]);
-  PDI::send(u.bytes[3]);
+  PDI::Link::send(u.bytes[0]);
+  PDI::Link::send(u.bytes[1]);
+  PDI::Link::send(u.bytes[2]);
+  PDI::Link::send(u.bytes[3]);
 }
 
 static Util::MaybeUint8 getReceivedFrame() {
@@ -125,7 +125,7 @@ static Util::MaybeUint8 getReceivedFrame() {
   }
 }
 
-Util::MaybeUint8 PDI::recv() {
+Util::MaybeUint8 PDI::Link::recv() {
   ensureReceiveMode();
 
   for (uint16_t i = 0; i < PDI::TIMEOUT_CYCLES; i++) {
@@ -140,27 +140,27 @@ Util::MaybeUint8 PDI::recv() {
 }
 
 Util::MaybeUint8 PDI::Instruction::lds41(uint32_t addr) {
-  PDI::send(0x0C);
-  PDI::send4(addr);
-  return PDI::recv();
+  PDI::Link::send(0x0C);
+  PDI::Link::send4(addr);
+  return PDI::Link::recv();
 }
 
 void PDI::Instruction::sts41(uint32_t addr, uint8_t data) {
-  PDI::send(0x4C);
-  PDI::send4(addr);
-  PDI::send(data);
+  PDI::Link::send(0x4C);
+  PDI::Link::send4(addr);
+  PDI::Link::send(data);
 }
 
 Util::MaybeUint8 PDI::Instruction::ldcs(PDI::CSReg reg) {
   uint8_t regNum = ((uint8_t) reg) & 0xF;
-  PDI::send(0x80 | regNum);
-  return PDI::recv();
+  PDI::Link::send(0x80 | regNum);
+  return PDI::Link::recv();
 }
 
 void PDI::Instruction::stcs(PDI::CSReg reg, uint8_t data) {
   uint8_t regNum = ((uint8_t) reg) & 0xF;
-  PDI::send(0xC0 | regNum);
-  PDI::send(data);
+  PDI::Link::send(0xC0 | regNum);
+  PDI::Link::send(data);
 }
 
 void PDI::Instruction::key() {
@@ -171,6 +171,6 @@ void PDI::Instruction::key() {
     0x45, 0xAB, 0x89, 0x12,
   };
   for (uint8_t i = 0; i < LEN; i++) {
-    PDI::send(pgm_read_byte(&BYTES[i]));
+    PDI::Link::send(pgm_read_byte(&BYTES[i]));
   }
 }
