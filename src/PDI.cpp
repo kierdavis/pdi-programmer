@@ -103,16 +103,21 @@ void PDI::send(uint8_t byte) {
   Platform::Serial::writeData(byte);
 }
 
-PDI::RecvResult PDI::recv() {
-  // TODO: timeout
-
-  ensureReceiveMode();
-
-  while (!Platform::Serial::rxComplete()) {}
+static PDI::RecvResult getReceivedFrame() {
   if (Platform::Serial::rxError()) {
     return PDI::RecvResult(Util::Status::SERIAL_ERROR);
   } else {
     uint8_t data = Platform::Serial::readData();
     return PDI::RecvResult(Util::Status::OK, data);
   }
+}
+
+PDI::RecvResult PDI::recv() {
+  // TODO: timeout
+
+  ensureReceiveMode();
+
+  while (!Platform::Serial::rxComplete()) {}
+
+  return getReceivedFrame();
 }
