@@ -110,7 +110,7 @@ Util::Status NVM::read(uint32_t addr, uint8_t * buffer, uint16_t len) {
   PDI::Instruction::st4(PDI::PtrMode::DIRECT, addr);
 
   // Read `len` bytes using the auto-increment mode.
-  return PDI::Instruction::bulkLd12(PDI::PtrMode::INDIRECT, buffer, len);
+  return PDI::Instruction::bulkLd12(PDI::PtrMode::INDIRECT_INCR, buffer, len);
 }
 
 Util::Status NVM::eraseChip() {
