@@ -16,9 +16,40 @@ enum class Mode : uint8_t {
 
 static Mode mode = Mode::NEITHER;
 
-static void waitForClockCycle();
-static void ensureTransmitMode();
-static void ensureReceiveMode();
+static void waitForClockCycle() {
+  while (Platform::Pin::read(PDIPin::CLK)) {}
+  while (!Platform::Pin::read(PDIPin::CLK)) {}
+  while (Platform::Pin::read(PDIPin::CLK)) {}
+}
+
+static void ensureTransmitMode() {
+  if (mode != Mode::TRANSMITTING) {
+    // Wait for a clock cycle.
+    waitForClockCycle();
+
+    Platform::Pin::configureAsOutput(PDIPin::TXD, true);
+
+    Platform::Serial::enableTx();
+    Platform::Serial::disableRx();
+
+    mode = Mode::TRANSMITTING;
+  }
+}
+
+static void ensureReceiveMode() {
+  if (mode != Mode::RECEIVING) {
+    // Wait for transmissions to complete.
+    while (!Platform::Serial::txComplete()) {}
+    Platform::Serial::resetTxComplete();
+
+    Platform::Serial::enableRx();
+    Platform::Serial::disableTx();
+
+    Platform::Pin::configureAsInput(PDIPin::TXD);
+
+    mode = Mode::RECEIVING;
+  }
+}
 
 void PDI::init() {
   mode = Mode::NEITHER;
@@ -62,41 +93,6 @@ void PDI::end() {
   Platform::Pin::configureAsInput(PDIPin::CLK);
   Platform::Pin::configureAsInput(PDIPin::TXD);
   Platform::Pin::configureAsInput(PDIPin::RXD);
-}
-
-static void waitForClockCycle() {
-  while (Platform::Pin::read(PDIPin::CLK)) {}
-  while (!Platform::Pin::read(PDIPin::CLK)) {}
-  while (Platform::Pin::read(PDIPin::CLK)) {}
-}
-
-static void ensureTransmitMode() {
-  if (mode != Mode::TRANSMITTING) {
-    // Wait for a clock cycle.
-    waitForClockCycle();
-
-    Platform::Pin::configureAsOutput(PDIPin::TXD, true);
-
-    Platform::Serial::enableTx();
-    Platform::Serial::disableRx();
-
-    mode = Mode::TRANSMITTING;
-  }
-}
-
-static void ensureReceiveMode() {
-  if (mode != Mode::RECEIVING) {
-    // Wait for transmissions to complete.
-    while (!Platform::Serial::txComplete()) {}
-    Platform::Serial::resetTxComplete();
-
-    Platform::Serial::enableRx();
-    Platform::Serial::disableTx();
-
-    Platform::Pin::configureAsInput(PDIPin::TXD);
-
-    mode = Mode::RECEIVING;
-  }
 }
 
 void PDI::send(uint8_t byte) {
