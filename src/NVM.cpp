@@ -4,6 +4,16 @@
 #include "PDI.hpp"
 #include "Util.hpp"
 
+uint32_t NVM::Controller::regAddr(NVM::Controller::Reg reg) {
+  static constexpr uint32_t BASE_ADDR = 0x010001C0;
+  return BASE_ADDR + ((uint32_t) reg);
+}
+
+void NVM::Controller::writeReg(NVM::Controller::Reg reg, uint8_t data) {
+  uint32_t addr = NVM::Controller::regAddr(reg);
+  PDI::Instruction::sts41(addr, data);
+}
+
 Util::Status NVM::Controller::waitWhileBusBusy() {
   static constexpr uint8_t NVMEN_MASK = 0x02;
 
