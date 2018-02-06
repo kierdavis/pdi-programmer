@@ -103,16 +103,16 @@ void PDI::send(uint8_t byte) {
   Platform::Serial::writeData(byte);
 }
 
-static PDI::RecvResult getReceivedFrame() {
+static Util::MaybeUint8 getReceivedFrame() {
   if (Platform::Serial::rxError()) {
-    return PDI::RecvResult(Util::Status::SERIAL_ERROR);
+    return Util::MaybeUint8(Util::Status::SERIAL_ERROR);
   } else {
     uint8_t data = Platform::Serial::readData();
-    return PDI::RecvResult(Util::Status::OK, data);
+    return Util::MaybeUint8(Util::Status::OK, data);
   }
 }
 
-PDI::RecvResult PDI::recv() {
+Util::MaybeUint8 PDI::recv() {
   ensureReceiveMode();
 
   for (uint16_t i = 0; i < PDI::TIMEOUT_CYCLES; i++) {
@@ -123,5 +123,5 @@ PDI::RecvResult PDI::recv() {
   }
 
   // TIMEOUT_CYCLES clock cycles passed without a frame being received.
-  return PDI::RecvResult(Util::Status::SERIAL_TIMEOUT);
+  return Util::MaybeUint8(Util::Status::SERIAL_TIMEOUT);
 }

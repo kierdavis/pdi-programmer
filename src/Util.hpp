@@ -10,6 +10,15 @@ namespace Util {
     SERIAL_TIMEOUT,
     UNKNOWN_ERROR,
   };
+
+  class MaybeUint8 {
+  public:
+    Status status;
+    uint8_t data;
+    MaybeUint8(Status status_ = Status::UNKNOWN_ERROR, uint8_t data_ = 0)
+      : status(status_), data(data_) {}
+    bool ok() { return status == Status::OK; }
+  };
 }
 
 #endif
