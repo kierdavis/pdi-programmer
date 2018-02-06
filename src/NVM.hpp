@@ -59,9 +59,7 @@ namespace NVM {
     Util::Status waitWhileBusy();
   }
 
-  namespace Chip {
-    Util::Status erase();
-  }
+  Util::Status eraseChip();
 }
 
 #endif

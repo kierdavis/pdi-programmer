@@ -98,7 +98,7 @@ Util::Status NVM::Controller::waitWhileBusy() {
   return waitWhileControllerBusy();
 }
 
-Util::Status NVM::Chip::erase() {
+Util::Status NVM::eraseChip() {
   Util::Status status = NVM::Controller::waitWhileBusy();
   if (status != Util::Status::OK) { return status; }
 
