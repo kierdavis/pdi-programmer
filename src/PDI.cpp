@@ -138,6 +138,12 @@ Util::MaybeUint8 PDI::recv() {
   return Util::MaybeUint8(Util::Status::SERIAL_TIMEOUT);
 }
 
+Util::MaybeUint8 PDI::Instruction::lds41(uint32_t addr) {
+  PDI::send(0x0C);
+  PDI::send4(addr);
+  return PDI::recv();
+}
+
 Util::MaybeUint8 PDI::Instruction::ldcs(PDI::CSReg reg) {
   uint8_t regNum = ((uint8_t) reg) & 0xF;
   PDI::send(0x80 | regNum);
