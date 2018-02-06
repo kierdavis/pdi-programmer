@@ -159,6 +159,12 @@ void PDI::Instruction::sts41(uint32_t addr, uint8_t data) {
   PDI::Link::send(data);
 }
 
+void PDI::Instruction::st4(PDI::PtrMode pm, uint32_t data) {
+  uint8_t pmMask = ((uint8_t) pm) & 0xC;
+  PDI::Link::send(0x63 | pmMask);
+  PDI::Link::send4(data);
+}
+
 Util::MaybeUint8 PDI::Instruction::ldcs(PDI::CSReg reg) {
   uint8_t regNum = ((uint8_t) reg) & 0xF;
   PDI::Link::send(0x80 | regNum);

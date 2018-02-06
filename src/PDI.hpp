@@ -21,6 +21,12 @@ namespace PDI {
     Util::MaybeUint8 recv();
   }
 
+  enum class PtrMode : uint8_t {
+    INDIRECT = 0 << 2,
+    INDIRECT_INCR = 1 << 2,
+    DIRECT = 2 << 2,
+  };
+
   enum class CSReg : uint8_t {
     STATUS = 0,
     RESET = 1,
@@ -30,6 +36,8 @@ namespace PDI {
   namespace Instruction {
     Util::MaybeUint8 lds41(uint32_t addr);
     void sts41(uint32_t addr, uint8_t data);
+
+    void st4(PtrMode pm, uint32_t data);
 
     Util::MaybeUint8 ldcs(CSReg reg);
     void stcs(CSReg reg, uint8_t data);
