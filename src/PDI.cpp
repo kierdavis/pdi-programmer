@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <avr/pgmspace.h>
 #include <util/delay.h>
 
 #include "PDI.hpp"
@@ -160,4 +161,16 @@ void PDI::Instruction::stcs(PDI::CSReg reg, uint8_t data) {
   uint8_t regNum = ((uint8_t) reg) & 0xF;
   PDI::send(0xC0 | regNum);
   PDI::send(data);
+}
+
+void PDI::Instruction::key() {
+  static constexpr uint8_t LEN = 9;
+  static const uint8_t BYTES[LEN] PROGMEM = {
+    0xE0, // Instruction byte
+    0xFF, 0x88, 0xD8, 0xCD,
+    0x45, 0xAB, 0x89, 0x12,
+  };
+  for (uint8_t i = 0; i < LEN; i++) {
+    PDI::send(pgm_read_byte(&BYTES[i]));
+  }
 }
