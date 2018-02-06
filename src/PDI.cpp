@@ -165,6 +165,31 @@ Util::MaybeUint8 PDI::Instruction::ld1(PDI::PtrMode pm) {
   return PDI::Link::recv();
 }
 
+Util::Status PDI::Instruction::bulkLd12(PDI::PtrMode pm, uint8_t * buffer, uint16_t len) {
+  // Check for shortcuts.
+  if (len == 0) { return Util::Status::OK; }
+  if (len == 1) {
+    Util::MaybeUint8 result = PDI::Instruction::ld1(pm);
+    if (!result.ok()) { return result.status; }
+    buffer[0] = result.data;
+    return Util::Status::OK;
+  }
+  // Send the REPEAT instruction.
+  // `len` cannot be 0, so `len - 1` cannot underflow.
+  PDI::Instruction::repeat2(len - 1);
+  // Send the LD instruction byte.
+  uint8_t pmMask = ((uint8_t) pm) & 0xC;
+  PDI::Link::send(0x20 | pmMask);
+  // The target device executes LD `len` times, responding with the same number
+  // of bytes.
+  for (uint16_t i = 0; i < len; i++) {
+    Util::MaybeUint8 result = PDI::Link::recv();
+    if (!result.ok()) { return result.status; }
+    buffer[i] = result.data;
+  }
+  return Util::Status::OK;
+}
+
 void PDI::Instruction::st4(PDI::PtrMode pm, uint32_t data) {
   uint8_t pmMask = ((uint8_t) pm) & 0xC;
   PDI::Link::send(0x63 | pmMask);

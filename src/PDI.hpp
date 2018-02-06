@@ -38,6 +38,7 @@ namespace PDI {
     void sts41(uint32_t addr, uint8_t data);
 
     Util::MaybeUint8 ld1(PtrMode pm);
+    Util::Status bulkLd12(PtrMode pm, uint8_t * buffer, uint16_t len);
     void st4(PtrMode pm, uint32_t data);
 
     Util::MaybeUint8 ldcs(CSReg reg);
