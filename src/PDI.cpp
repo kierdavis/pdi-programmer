@@ -204,3 +204,20 @@ void PDI::Instruction::key() {
     PDI::Link::send(pgm_read_byte(&BYTES[i]));
   }
 }
+
+void PDI::enterResetState() {
+  static constexpr uint8_t RESET_SIGNATURE = 0x59;
+  PDI::Instruction::stcs(PDI::CSReg::RESET, RESET_SIGNATURE);
+}
+
+void PDI::exitResetState() {
+  PDI::Instruction::stcs(PDI::CSReg::RESET, 0);
+}
+
+Util::MaybeBool PDI::inResetState() {
+  static constexpr uint8_t MASK = 0x01;
+
+  Util::MaybeUint8 result = PDI::Instruction::ldcs(PDI::CSReg::RESET);
+  bool inResetState = result.data & MASK;
+  return Util::MaybeBool(result.status, inResetState);
+}

@@ -47,6 +47,10 @@ namespace PDI {
     void repeat2(uint16_t count);
     void key();
   }
+
+  void enterResetState();
+  void exitResetState();
+  Util::MaybeBool inResetState();
 }
 
 #endif
