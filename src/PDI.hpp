@@ -34,6 +34,8 @@ namespace PDI {
     Util::MaybeUint8 ldcs(CSReg reg);
     void stcs(CSReg reg, uint8_t data);
 
+    void repeat1(uint8_t count);
+    void repeat2(uint16_t count);
     void key();
   }
 }

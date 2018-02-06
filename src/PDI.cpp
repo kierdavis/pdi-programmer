@@ -171,6 +171,16 @@ void PDI::Instruction::stcs(PDI::CSReg reg, uint8_t data) {
   PDI::Link::send(data);
 }
 
+void PDI::Instruction::repeat1(uint8_t count) {
+  PDI::Link::send(0xA0);
+  PDI::Link::send(count);
+}
+
+void PDI::Instruction::repeat2(uint16_t count) {
+  PDI::Link::send(0xA1);
+  PDI::Link::send2(count);
+}
+
 void PDI::Instruction::key() {
   static constexpr uint8_t LEN = 9;
   static const uint8_t BYTES[LEN] PROGMEM = {
