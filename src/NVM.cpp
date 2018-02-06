@@ -13,7 +13,7 @@ Util::Status NVM::begin() {
   PDI::enterResetState();
   PDI::setGuardTime(PDI::GuardTime::_32);
   PDI::Instruction::key();
-  return NVM::Controller::waitWhileBusBusy();
+  return NVM::Controller::waitWhileBusy();
 }
 
 static Util::Status exitResetAndWait() {
@@ -33,7 +33,7 @@ static Util::Status exitResetAndWait() {
 void NVM::end() {
   // Deliberately ignore Util::Status results here - in the event of a failure
   // we should proceed with shutting down the PDI link anyway.
-  NVM::Controller::waitWhileBusBusy();
+  NVM::Controller::waitWhileBusy();
   exitResetAndWait();
   PDI::end();
 }
@@ -48,7 +48,7 @@ void NVM::Controller::writeReg(NVM::Controller::Reg reg, uint8_t data) {
   PDI::Instruction::sts41(addr, data);
 }
 
-Util::Status NVM::Controller::waitWhileBusBusy() {
+static Util::Status waitWhileBusBusy() {
   static constexpr uint8_t NVMEN_MASK = 0x02;
 
   while (1) {
@@ -62,7 +62,7 @@ Util::Status NVM::Controller::waitWhileBusBusy() {
   }
 }
 
-Util::Status NVM::Controller::waitWhileControllerBusy() {
+static Util::Status waitWhileControllerBusy() {
   static constexpr uint8_t BUSY_MASK = 0x80;
 
   // Put address of STATUS register into PDI pointer register.
@@ -79,4 +79,12 @@ Util::Status NVM::Controller::waitWhileControllerBusy() {
       return Util::Status::OK;
     }
   }
+}
+
+Util::Status NVM::Controller::waitWhileBusy() {
+  Util::Status status = waitWhileBusBusy();
+  if (status != Util::Status::OK) {
+    return status;
+  }
+  return waitWhileControllerBusy();
 }
