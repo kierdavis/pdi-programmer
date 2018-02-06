@@ -131,3 +131,9 @@ Util::MaybeUint8 PDI::Instruction::ldcs(PDI::CSReg reg) {
   PDI::send(0x80 | regNum);
   return PDI::recv();
 }
+
+void PDI::Instruction::stcs(PDI::CSReg reg, uint8_t data) {
+  uint8_t regNum = ((uint8_t) reg) & 0xF;
+  PDI::send(0xC0 | regNum);
+  PDI::send(data);
+}

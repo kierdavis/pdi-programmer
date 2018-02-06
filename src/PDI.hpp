@@ -24,6 +24,7 @@ namespace PDI {
 
   namespace Instruction {
     Util::MaybeUint8 ldcs(CSReg reg);
+    void stcs(CSReg reg, uint8_t data);
   }
 }
 
