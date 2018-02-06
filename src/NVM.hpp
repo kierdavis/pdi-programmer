@@ -15,6 +15,7 @@ namespace NVM {
     void writeReg(Reg reg, uint8_t data);
 
     Util::Status waitWhileBusBusy();
+    Util::Status waitWhileControllerBusy();
   }
 }
 

@@ -27,3 +27,22 @@ Util::Status NVM::Controller::waitWhileBusBusy() {
     }
   }
 }
+
+Util::Status NVM::Controller::waitWhileControllerBusy() {
+  static constexpr uint8_t BUSY_MASK = 0x80;
+
+  // Put address of STATUS register into PDI pointer register.
+  uint32_t addr = NVM::Controller::regAddr(NVM::Controller::Reg::STATUS);
+  PDI::Instruction::st4(PDI::PtrMode::DIRECT, addr);
+
+  // Poll STATUS register until BUSY flag is no longer set.
+  while (1) {
+    Util::MaybeUint8 result = PDI::Instruction::ld1(PDI::PtrMode::INDIRECT);
+    if (!result.ok()) {
+      return result.status;
+    }
+    if (!(result.data & BUSY_MASK)) {
+      return Util::Status::OK;
+    }
+  }
+}
