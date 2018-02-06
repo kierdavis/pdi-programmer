@@ -190,10 +190,33 @@ Util::Status PDI::Instruction::bulkLd12(PDI::PtrMode pm, uint8_t * buffer, uint1
   return Util::Status::OK;
 }
 
+void PDI::Instruction::st1(PDI::PtrMode pm, uint8_t data) {
+  uint8_t pmMask = ((uint8_t) pm) & 0xC;
+  PDI::Link::send(0x60 | pmMask);
+  PDI::Link::send(data);
+}
+
 void PDI::Instruction::st4(PDI::PtrMode pm, uint32_t data) {
   uint8_t pmMask = ((uint8_t) pm) & 0xC;
   PDI::Link::send(0x63 | pmMask);
   PDI::Link::send4(data);
+}
+
+void PDI::Instruction::bulkSt12(PDI::PtrMode pm, const uint8_t * buffer, uint16_t len) {
+  // Check for shortcuts.
+  if (len == 0) { return; }
+  if (len == 1) { PDI::Instruction::st1(pm, buffer[0]); }
+  // Send the REPEAT instruction.
+  // `len` cannot be 0, so `len - 1` cannot underflow.
+  PDI::Instruction::repeat2(len - 1);
+  // Send the ST instruction byte.
+  uint8_t pmMask = ((uint8_t) pm) & 0xC;
+  PDI::Link::send(0x60 | pmMask);
+  // The target device executes ST `len` times, accepting the same number of
+  // bytes.
+  for (uint16_t i = 0; i < len; i++) {
+    PDI::Link::send(buffer[i]);
+  }
 }
 
 Util::MaybeUint8 PDI::Instruction::ldcs(PDI::CSReg reg) {
