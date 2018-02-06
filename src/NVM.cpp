@@ -48,6 +48,10 @@ void NVM::Controller::writeReg(NVM::Controller::Reg reg, uint8_t data) {
   PDI::Instruction::sts41(addr, data);
 }
 
+void NVM::Controller::writeCmd(NVM::Controller::Cmd cmd) {
+  NVM::Controller::writeReg(NVM::Controller::Reg::CMD, (uint8_t) cmd);
+}
+
 static Util::Status waitWhileBusBusy() {
   static constexpr uint8_t NVMEN_MASK = 0x02;
 
