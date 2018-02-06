@@ -4,6 +4,9 @@
 #include "Util.hpp"
 
 namespace NVM {
+  namespace Controller {
+    Util::Status waitWhileBusBusy();
+  }
 }
 
 #endif
