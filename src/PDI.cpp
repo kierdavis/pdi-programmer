@@ -56,6 +56,7 @@ void PDI::end() {
   Platform::Serial::disableRx();
   Platform::Serial::disableTx();
   Platform::Serial::disableClock();
+  Platform::Serial::resetTxComplete();
 
   // Tri-state all pins.
   Platform::Pin::configureAsInput(PDIPin::CLK);
