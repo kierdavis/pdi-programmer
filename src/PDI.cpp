@@ -125,3 +125,9 @@ Util::MaybeUint8 PDI::recv() {
   // TIMEOUT_CYCLES clock cycles passed without a frame being received.
   return Util::MaybeUint8(Util::Status::SERIAL_TIMEOUT);
 }
+
+Util::MaybeUint8 PDI::Instruction::ldcs(PDI::CSReg reg) {
+  uint8_t regNum = ((uint8_t) reg) & 0xF;
+  PDI::send(0x80 | regNum);
+  return PDI::recv();
+}

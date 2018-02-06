@@ -15,6 +15,16 @@ namespace PDI {
   void end();
   void send(uint8_t byte);
   Util::MaybeUint8 recv();
+
+  enum class CSReg : uint8_t {
+    STATUS = 0,
+    RESET = 1,
+    CTRL = 2,
+  };
+
+  namespace Instruction {
+    Util::MaybeUint8 ldcs(CSReg reg);
+  }
 }
 
 #endif
