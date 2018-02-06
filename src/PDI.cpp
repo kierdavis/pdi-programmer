@@ -144,6 +144,12 @@ Util::MaybeUint8 PDI::Instruction::lds41(uint32_t addr) {
   return PDI::recv();
 }
 
+void PDI::Instruction::sts41(uint32_t addr, uint8_t data) {
+  PDI::send(0x4C);
+  PDI::send4(addr);
+  PDI::send(data);
+}
+
 Util::MaybeUint8 PDI::Instruction::ldcs(PDI::CSReg reg) {
   uint8_t regNum = ((uint8_t) reg) & 0xF;
   PDI::send(0x80 | regNum);
