@@ -4,6 +4,40 @@
 #include "PDI.hpp"
 #include "Util.hpp"
 
+void NVM::init() {
+  PDI::init();
+}
+
+Util::Status NVM::begin() {
+  PDI::begin();
+  PDI::enterResetState();
+  PDI::setGuardTime(PDI::GuardTime::_32);
+  PDI::Instruction::key();
+  return NVM::Controller::waitWhileBusBusy();
+}
+
+static Util::Status exitResetAndWait() {
+  while (1) {
+    PDI::exitResetState();
+    Util::MaybeBool result = PDI::inResetState();
+    if (!result.ok()) {
+      return result.status;
+    }
+    if (!result.data) {
+      // inResetState is false
+      return Util::Status::OK;
+    }
+  }
+}
+
+void NVM::end() {
+  // Deliberately ignore Util::Status results here - in the event of a failure
+  // we should proceed with shutting down the PDI link anyway.
+  NVM::Controller::waitWhileBusBusy();
+  exitResetAndWait();
+  PDI::end();
+}
+
 uint32_t NVM::Controller::regAddr(NVM::Controller::Reg reg) {
   static constexpr uint32_t BASE_ADDR = 0x010001C0;
   return BASE_ADDR + ((uint32_t) reg);

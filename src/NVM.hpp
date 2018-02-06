@@ -4,6 +4,10 @@
 #include "Util.hpp"
 
 namespace NVM {
+  void init();
+  Util::Status begin();
+  void end();
+
   namespace Controller {
     enum class Reg : uint8_t {
       CMD = 0x0A,
