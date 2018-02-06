@@ -104,26 +104,24 @@ void PDI::Link::send(uint8_t byte) {
   Platform::Serial::writeData(byte);
 }
 
-void PDI::Link::send2(uint16_t data) {
+void PDI::Link::send2(uint16_t word) {
   union {
     uint16_t word;
     uint8_t bytes[2];
-  } u;
-  u.word = data;
-  PDI::Link::send(u.bytes[0]);
-  PDI::Link::send(u.bytes[1]);
+  } u = { .word = word };
+  for (uint8_t i = 0; i < 2; i++) {
+    PDI::Link::send(u.bytes[i]);
+  }
 }
 
-void PDI::Link::send4(uint32_t data) {
+void PDI::Link::send4(uint32_t word) {
   union {
     uint32_t word;
     uint8_t bytes[4];
-  } u;
-  u.word = data;
-  PDI::Link::send(u.bytes[0]);
-  PDI::Link::send(u.bytes[1]);
-  PDI::Link::send(u.bytes[2]);
-  PDI::Link::send(u.bytes[3]);
+  } u = { .word = word };
+  for (uint8_t i = 0; i < 4; i++) {
+    PDI::Link::send(u.bytes[i]);
+  }
 }
 
 static Util::MaybeUint8 getReceivedFrame() {
