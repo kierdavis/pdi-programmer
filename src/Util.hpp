@@ -7,6 +7,7 @@ namespace Util {
   enum class Status : uint8_t {
     OK,
     SERIAL_ERROR,
+    SERIAL_TIMEOUT,
     UNKNOWN_ERROR,
   };
 }

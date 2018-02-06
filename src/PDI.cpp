@@ -113,11 +113,15 @@ static PDI::RecvResult getReceivedFrame() {
 }
 
 PDI::RecvResult PDI::recv() {
-  // TODO: timeout
-
   ensureReceiveMode();
 
-  while (!Platform::Serial::rxComplete()) {}
+  for (uint16_t i = 0; i < PDI::TIMEOUT_CYCLES; i++) {
+    if (Platform::Serial::rxComplete()) {
+      return getReceivedFrame();
+    }
+    waitForClockCycle();
+  }
 
-  return getReceivedFrame();
+  // TIMEOUT_CYCLES clock cycles passed without a frame being received.
+  return PDI::RecvResult(Util::Status::SERIAL_TIMEOUT);
 }

@@ -8,6 +8,7 @@
 
 namespace PDI {
   static constexpr uint32_t BAUD_RATE = 2000000;
+  static constexpr uint16_t TIMEOUT_CYCLES = 1024;
 
   class RecvResult {
   public:
