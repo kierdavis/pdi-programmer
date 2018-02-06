@@ -1,10 +1,12 @@
 #include <stdbool.h>
+#include <stdint.h>
 
 #include <util/delay.h>
 
 #include "PDI.hpp"
 #include "PDIPin.hpp"
 #include "Platform.hpp"
+#include "Util.hpp"
 
 enum class Mode : uint8_t {
   NEITHER,
