@@ -98,6 +98,21 @@ Util::Status NVM::Controller::waitWhileBusy() {
   return waitWhileControllerBusy();
 }
 
+Util::Status NVM::read(uint32_t addr, uint8_t * buffer, uint16_t len) {
+  if (len == 0) { return Util::Status::OK; }
+
+  Util::Status status = NVM::Controller::waitWhileBusy();
+  if (status != Util::Status::OK) { return status; }
+
+  NVM::Controller::writeCmd(NVM::Controller::Cmd::READNVM);
+
+  // Set the PDI pointer to the address of the first byte.
+  PDI::Instruction::st4(PDI::PtrMode::DIRECT, addr);
+
+  // Read `len` bytes using the auto-increment mode.
+  return PDI::Instruction::bulkLd12(PDI::PtrMode::INDIRECT, buffer, len);
+}
+
 Util::Status NVM::eraseChip() {
   Util::Status status = NVM::Controller::waitWhileBusy();
   if (status != Util::Status::OK) { return status; }

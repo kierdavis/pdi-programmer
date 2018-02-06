@@ -59,6 +59,8 @@ namespace NVM {
     Util::Status waitWhileBusy();
   }
 
+  Util::Status read(uint32_t addr, uint8_t * buffer, uint16_t len);
+
   Util::Status eraseChip();
 }
 
