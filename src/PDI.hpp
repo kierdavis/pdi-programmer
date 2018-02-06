@@ -48,9 +48,20 @@ namespace PDI {
     void key();
   }
 
+  enum class GuardTime : uint8_t {
+    _128 = 0x0,
+    _64 = 0x1,
+    _32 = 0x2,
+    _16 = 0x3,
+    _8 = 0x4,
+    _4 = 0x5,
+    _2 = 0x6,
+  };
+
   void enterResetState();
   void exitResetState();
   Util::MaybeBool inResetState();
+  void setGuardTime(GuardTime gt);
 }
 
 #endif

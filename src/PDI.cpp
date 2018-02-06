@@ -221,3 +221,8 @@ Util::MaybeBool PDI::inResetState() {
   bool inResetState = result.data & MASK;
   return Util::MaybeBool(result.status, inResetState);
 }
+
+void PDI::setGuardTime(PDI::GuardTime gt) {
+  uint8_t data = ((uint8_t) gt) & 0x7;
+  PDI::Instruction::stcs(PDI::CSReg::CTRL, data);
+}
