@@ -103,6 +103,18 @@ void PDI::send(uint8_t byte) {
   Platform::Serial::writeData(byte);
 }
 
+void PDI::send4(uint32_t data) {
+  union {
+    uint32_t word;
+    uint8_t bytes[4];
+  } u;
+  u.word = data;
+  PDI::send(u.bytes[0]);
+  PDI::send(u.bytes[1]);
+  PDI::send(u.bytes[2]);
+  PDI::send(u.bytes[3]);
+}
+
 static Util::MaybeUint8 getReceivedFrame() {
   if (Platform::Serial::rxError()) {
     return Util::MaybeUint8(Util::Status::SERIAL_ERROR);

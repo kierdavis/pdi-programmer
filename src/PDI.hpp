@@ -16,6 +16,8 @@ namespace PDI {
   void send(uint8_t byte);
   Util::MaybeUint8 recv();
 
+  void send4(uint32_t data);
+
   enum class CSReg : uint8_t {
     STATUS = 0,
     RESET = 1,
