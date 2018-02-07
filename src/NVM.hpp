@@ -1,12 +1,16 @@
 #ifndef __PDIPROG_NVM_HPP
 #define __PDIPROG_NVM_HPP
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #include "Util.hpp"
 
 namespace NVM {
   void init();
   void begin();
   void end();
+  bool active();
 
   namespace Controller {
     enum class Reg : uint8_t {

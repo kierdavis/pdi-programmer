@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "NVM.hpp"
@@ -5,7 +6,10 @@
 #include "TargetConfig.hpp"
 #include "Util.hpp"
 
+static bool activeFlag = false;
+
 void NVM::init() {
+  activeFlag = false;
   PDI::init();
 }
 
@@ -14,6 +18,7 @@ void NVM::begin() {
   PDI::enterResetState();
   PDI::setGuardTime(PDI::GuardTime::_32);
   PDI::Instruction::key();
+  activeFlag = true;
 }
 
 static Util::Status exitResetAndWait() {
@@ -31,11 +36,16 @@ static Util::Status exitResetAndWait() {
 }
 
 void NVM::end() {
+  activeFlag = false;
   // Deliberately ignore Util::Status results here - in the event of a failure
   // we should proceed with shutting down the PDI link anyway.
   NVM::Controller::waitWhileBusy();
   exitResetAndWait();
   PDI::end();
+}
+
+bool NVM::active() {
+  return activeFlag;
 }
 
 uint32_t NVM::Controller::regAddr(NVM::Controller::Reg reg) {
