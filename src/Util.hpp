@@ -5,10 +5,16 @@
 #include <stdint.h>
 
 namespace Util {
+  static uint16_t min(uint16_t x, uint16_t y) {
+    return (x < y) ? x : y;
+  }
+
   enum class Status : uint8_t {
     OK,
     SERIAL_ERROR,
     SERIAL_TIMEOUT,
+    INVALID_LENGTH,
+    INVALID_SECTION,
     UNKNOWN_ERROR,
   };
 

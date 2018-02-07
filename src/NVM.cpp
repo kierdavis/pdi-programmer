@@ -2,6 +2,7 @@
 
 #include "NVM.hpp"
 #include "PDI.hpp"
+#include "TargetConfig.hpp"
 #include "Util.hpp"
 
 void NVM::init() {
@@ -122,7 +123,120 @@ Util::Status NVM::eraseChip() {
   Util::Status status = NVM::Controller::waitWhileBusy();
   if (status != Util::Status::OK) { return status; }
 
-  NVM::Controller::writeCmd(NVM::Controller::Cmd::CHIPERASE);
-  NVM::Controller::cmdex();
+  NVM::Controller::execCmd(NVM::Controller::Cmd::CHIPERASE);
+  return Util::Status::OK;
+}
+
+Util::Status NVM::Flash::eraseSection(uint32_t addr, NVM::Flash::Section section) {
+  using NVM::Controller::Cmd;
+  using NVM::Flash::Section;
+
+  Cmd cmd;
+  switch (section) {
+    case Section::APP:  { cmd = Cmd::ERASEAPPSEC; break; }
+    case Section::BOOT: { cmd = Cmd::ERASEBOOTSEC; break; }
+    default:            { return Util::Status::INVALID_SECTION; }
+  }
+
+  Util::Status status = NVM::Controller::waitWhileBusy();
+  if (status != Util::Status::OK) { return status; }
+
+  NVM::Controller::writeCmd(cmd);
+  PDI::Instruction::sts41(addr, 0);
+  return Util::Status::OK;
+}
+
+Util::Status NVM::Flash::eraseBuffer() {
+  Util::Status status = NVM::Controller::waitWhileBusy();
+  if (status != Util::Status::OK) { return status; }
+
+  NVM::Controller::execCmd(NVM::Controller::Cmd::ERASEFLASHPAGEBUFF);
+  return Util::Status::OK;
+}
+
+Util::Status NVM::Flash::writeBuffer(uint32_t addr, const uint8_t * buffer, uint16_t len) {
+  if (len > TargetConfig::FLASH_PAGE_SIZE) {
+    return Util::Status::INVALID_LENGTH;
+  }
+
+  Util::Status status = NVM::Controller::waitWhileBusy();
+  if (status != Util::Status::OK) { return status; }
+
+  NVM::Controller::writeCmd(NVM::Controller::Cmd::LOADFLASHPAGEBUFF);
+
+  // Set the PDI pointer to the address at which to store the first byte.
+  PDI::Instruction::st4(PDI::PtrMode::DIRECT, addr);
+
+  // Write `len` bytes using the auto-increment mode.
+  PDI::Instruction::bulkSt12(PDI::PtrMode::INDIRECT_INCR, buffer, len);
+
+  return Util::Status::OK;
+}
+
+Util::Status NVM::Flash::erasePage(uint32_t addr, NVM::Flash::Section section) {
+  using NVM::Controller::Cmd;
+  using NVM::Flash::Section;
+
+  Cmd cmd;
+  switch (section) {
+    case Section::APP:  { cmd = Cmd::ERASEAPPSECPAGE; break; }
+    case Section::BOOT: { cmd = Cmd::ERASEBOOTSECPAGE; break; }
+    default:            { cmd = Cmd::ERASEFLASHPAGE; break; }
+  }
+
+  Util::Status status = NVM::Controller::waitWhileBusy();
+  if (status != Util::Status::OK) { return status; }
+
+  NVM::Controller::writeCmd(cmd);
+  PDI::Instruction::sts41(addr, 0);
+  return Util::Status::OK;
+}
+
+Util::Status NVM::Flash::writePageFromBuffer(uint32_t addr, bool preErase, NVM::Flash::Section section) {
+  using NVM::Controller::Cmd;
+  using NVM::Flash::Section;
+
+  Cmd cmd;
+  if (preErase) {
+    switch (section) {
+      case Section::APP:  { cmd = Cmd::ERASEWRITEAPPSECPAGE; break; }
+      case Section::BOOT: { cmd = Cmd::ERASEWRITEBOOTSECPAGE; break; }
+      default:            { cmd = Cmd::ERASEWRITEFLASH; break; }
+    }
+  }
+  else {
+    switch (section) {
+      case Section::APP:  { cmd = Cmd::WRITEAPPSECPAGE; break; }
+      case Section::BOOT: { cmd = Cmd::WRITEBOOTSECPAGE; break; }
+      default:            { cmd = Cmd::WRITEFLASHPAGE; break; }
+    }
+  }
+
+  Util::Status status = NVM::Controller::waitWhileBusy();
+  if (status != Util::Status::OK) { return status; }
+
+  NVM::Controller::writeCmd(cmd);
+  PDI::Instruction::sts41(addr, 0);
+  return Util::Status::OK;
+}
+
+Util::Status NVM::Flash::writePage(uint32_t addr, const uint8_t * buffer, uint16_t len, bool preErase, NVM::Flash::Section section) {
+  Util::Status status;
+  status = NVM::Flash::eraseBuffer();
+  if (status != Util::Status::OK) { return status; }
+  status = NVM::Flash::writeBuffer(addr, buffer, len);
+  if (status != Util::Status::OK) { return status; }
+  return NVM::Flash::writePageFromBuffer(addr, preErase, section);
+}
+
+Util::Status NVM::Flash::write(uint32_t addr, const uint8_t * buffer, uint16_t len, bool preErase, NVM::Flash::Section section) {
+  while (len) {
+    uint16_t chunkLen = Util::min(len, TargetConfig::FLASH_PAGE_SIZE);
+    Util::Status status = NVM::Flash::writePage(addr, buffer, chunkLen, preErase, section);
+    if (status != Util::Status::OK) { return status; }
+    addr += (uint32_t) chunkLen;
+    buffer += chunkLen;
+    len -= chunkLen;
+  }
   return Util::Status::OK;
 }
