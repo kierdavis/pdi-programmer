@@ -30,8 +30,8 @@ static void ensureTransmitMode() {
 
     Platform::Pin::configureAsOutput(PDIPin::TXD, true);
 
-    Platform::Serial::enableTx();
-    Platform::Serial::disableRx();
+    Platform::TargetSerial::enableTx();
+    Platform::TargetSerial::disableRx();
 
     mode = Mode::TRANSMITTING;
   }
@@ -40,11 +40,11 @@ static void ensureTransmitMode() {
 static void ensureReceiveMode() {
   if (mode != Mode::RECEIVING) {
     // Wait for transmissions to complete.
-    while (!Platform::Serial::txComplete()) {}
-    Platform::Serial::resetTxComplete();
+    while (!Platform::TargetSerial::txComplete()) {}
+    Platform::TargetSerial::resetTxComplete();
 
-    Platform::Serial::enableRx();
-    Platform::Serial::disableTx();
+    Platform::TargetSerial::enableRx();
+    Platform::TargetSerial::disableTx();
 
     Platform::Pin::configureAsInput(PDIPin::TXD);
 
@@ -59,7 +59,7 @@ void PDI::init() {
   Platform::Pin::configureAsInput(PDIPin::CLK);
   Platform::Pin::configureAsInput(PDIPin::TXD);
   Platform::Pin::configureAsInput(PDIPin::RXD);
-  Platform::Serial::init();
+  Platform::TargetSerial::init();
 }
 
 void PDI::begin() {
@@ -71,8 +71,8 @@ void PDI::begin() {
   _delay_us(20);
 
   mode = Mode::TRANSMITTING;
-  Platform::Serial::enableClock();
-  Platform::Serial::enableTx();
+  Platform::TargetSerial::enableClock();
+  Platform::TargetSerial::enableTx();
 
   // Minimum 16 clock cycles.
   for (uint8_t i = 0; i < 18; i++) {
@@ -85,10 +85,10 @@ void PDI::end() {
   ensureReceiveMode();
 
   // Turn off UART.
-  Platform::Serial::disableRx();
-  Platform::Serial::disableTx();
-  Platform::Serial::disableClock();
-  Platform::Serial::resetTxComplete();
+  Platform::TargetSerial::disableRx();
+  Platform::TargetSerial::disableTx();
+  Platform::TargetSerial::disableClock();
+  Platform::TargetSerial::resetTxComplete();
 
   // Tri-state all pins.
   Platform::Pin::configureAsInput(PDIPin::CLK);
@@ -99,9 +99,9 @@ void PDI::end() {
 void PDI::Link::send(uint8_t byte) {
   ensureTransmitMode();
 
-  while (!Platform::Serial::txBufferEmpty()) {}
-  Platform::Serial::resetTxComplete();
-  Platform::Serial::writeData(byte);
+  while (!Platform::TargetSerial::txBufferEmpty()) {}
+  Platform::TargetSerial::resetTxComplete();
+  Platform::TargetSerial::writeData(byte);
 }
 
 void PDI::Link::send2(uint16_t word) {
@@ -125,10 +125,10 @@ void PDI::Link::send4(uint32_t word) {
 }
 
 static Util::MaybeUint8 getReceivedFrame() {
-  if (Platform::Serial::rxError()) {
+  if (Platform::TargetSerial::rxError()) {
     return Util::MaybeUint8(Util::Status::SERIAL_ERROR);
   } else {
-    uint8_t data = Platform::Serial::readData();
+    uint8_t data = Platform::TargetSerial::readData();
     return Util::MaybeUint8(Util::Status::OK, data);
   }
 }
@@ -137,7 +137,7 @@ Util::MaybeUint8 PDI::Link::recv() {
   ensureReceiveMode();
 
   for (uint16_t i = 0; i < PDI::TIMEOUT_CYCLES; i++) {
-    if (Platform::Serial::rxComplete()) {
+    if (Platform::TargetSerial::rxComplete()) {
       return getReceivedFrame();
     }
     waitForClockCycle();

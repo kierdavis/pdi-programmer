@@ -50,61 +50,61 @@ bool Platform::Pin::read(PDIPin pin) {
   return *PIN & pinMask(pin);
 }
 
-void Platform::Serial::init() {
+void Platform::TargetSerial::init() {
   UBRR1 = (F_CPU / (2 * PDI::BAUD_RATE)) - 1;
   UCSR1A = 0;
   UCSR1B = 0;
   UCSR1C = _BV(UPM11) | _BV(USBS1) | _BV(UCSZ11) | _BV(UCSZ10) | _BV(UCPOL1);
 }
 
-void Platform::Serial::enableClock() {
+void Platform::TargetSerial::enableClock() {
   UCSR1C |= _BV(UMSEL10);
 }
 
-void Platform::Serial::disableClock() {
+void Platform::TargetSerial::disableClock() {
   UCSR1C &= ~_BV(UMSEL10);
 }
 
-void Platform::Serial::enableTx() {
+void Platform::TargetSerial::enableTx() {
   UCSR1B |= _BV(TXEN1);
 }
 
-void Platform::Serial::disableTx() {
+void Platform::TargetSerial::disableTx() {
   UCSR1B &= ~_BV(TXEN1);
 }
 
-void Platform::Serial::enableRx() {
+void Platform::TargetSerial::enableRx() {
   UCSR1B |= _BV(RXEN1);
 }
 
-void Platform::Serial::disableRx() {
+void Platform::TargetSerial::disableRx() {
   UCSR1B &= ~_BV(RXEN1);
 }
 
-bool Platform::Serial::rxComplete() {
+bool Platform::TargetSerial::rxComplete() {
   return UCSR1A & _BV(RXC1);
 }
 
-bool Platform::Serial::txComplete() {
+bool Platform::TargetSerial::txComplete() {
   return UCSR1A & _BV(TXC1);
 }
 
-bool Platform::Serial::txBufferEmpty() {
+bool Platform::TargetSerial::txBufferEmpty() {
   return UCSR1A & _BV(UDRE1);
 }
 
-bool Platform::Serial::rxError() {
+bool Platform::TargetSerial::rxError() {
   return UCSR1A & (_BV(FE1) | _BV(DOR1) | _BV(UPE1));
 }
 
-void Platform::Serial::resetTxComplete() {
+void Platform::TargetSerial::resetTxComplete() {
   UCSR1A |= _BV(TXC1);
 }
 
-void Platform::Serial::writeData(uint8_t data) {
+void Platform::TargetSerial::writeData(uint8_t data) {
   UDR1 = data;
 }
 
-uint8_t Platform::Serial::readData() {
+uint8_t Platform::TargetSerial::readData() {
   return UDR1;
 }

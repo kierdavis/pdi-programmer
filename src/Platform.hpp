@@ -14,7 +14,7 @@ namespace Platform {
     bool read(PDIPin pin);
   }
 
-  namespace Serial {
+  namespace TargetSerial {
     void init();
     void enableClock();
     void disableClock();
