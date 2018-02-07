@@ -239,3 +239,12 @@ Util::Status NVM::Flash::write(uint32_t addr, Util::ByteProviderCallback callbac
   }
   return Util::Status::OK;
 }
+
+Util::Status NVM::Fuse::write(uint32_t addr, uint8_t data) {
+  Util::Status status = NVM::Controller::waitWhileBusy();
+  if (status != Util::Status::OK) { return status; }
+
+  NVM::Controller::writeCmd(NVM::Controller::Cmd::WRITEFUSE);
+  PDI::Instruction::sts41(addr, data);
+  return Util::Status::OK;
+}

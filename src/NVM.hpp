@@ -79,6 +79,10 @@ namespace NVM {
     Util::Status writePage(uint32_t addr, Util::ByteProviderCallback callback, uint16_t len, bool preErase = false, Section section = Section::UNSPECIFIED);
     Util::Status write(uint32_t addr, Util::ByteProviderCallback callback, uint16_t len, bool preErase = false, Section section = Section::UNSPECIFIED);
   }
+
+  namespace Fuse {
+    Util::Status write(uint32_t addr, uint8_t data);
+  }
 }
 
 #endif
