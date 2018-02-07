@@ -41,7 +41,7 @@ namespace PDI {
     Util::Status bulkLd12(PtrMode pm, uint8_t * buffer, uint16_t len);
     void st1(PtrMode pm, uint8_t data);
     void st4(PtrMode pm, uint32_t data);
-    void bulkSt12(PtrMode pm, const uint8_t * buffer, uint16_t len);
+    void bulkSt12(PtrMode pm, Util::ByteProviderCallback callback, uint16_t len);
 
     Util::MaybeUint8 ldcs(CSReg reg);
     void stcs(CSReg reg, uint8_t data);

@@ -35,6 +35,8 @@ namespace Util {
       : status(status_), data(data_) {}
     bool ok() { return status == Status::OK; }
   };
+
+  typedef uint8_t (*ByteProviderCallback)();
 }
 
 #endif

@@ -73,11 +73,11 @@ namespace NVM {
 
     Util::Status eraseSection(uint32_t addr, Section section);
     Util::Status eraseBuffer();
-    Util::Status writeBuffer(uint32_t addr, const uint8_t * buffer, uint16_t len);
+    Util::Status writeBuffer(uint32_t addr, Util::ByteProviderCallback callback, uint16_t len);
     Util::Status erasePage(uint32_t addr, Section section = Section::UNSPECIFIED);
     Util::Status writePageFromBuffer(uint32_t addr, bool preErase = false, Section section = Section::UNSPECIFIED);
-    Util::Status writePage(uint32_t addr, const uint8_t * buffer, uint16_t len, bool preErase = false, Section section = Section::UNSPECIFIED);
-    Util::Status write(uint32_t addr, const uint8_t * buffer, uint16_t len, bool preErase = false, Section section = Section::UNSPECIFIED);
+    Util::Status writePage(uint32_t addr, Util::ByteProviderCallback callback, uint16_t len, bool preErase = false, Section section = Section::UNSPECIFIED);
+    Util::Status write(uint32_t addr, Util::ByteProviderCallback callback, uint16_t len, bool preErase = false, Section section = Section::UNSPECIFIED);
   }
 }
 

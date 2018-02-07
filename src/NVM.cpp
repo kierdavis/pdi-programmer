@@ -154,7 +154,7 @@ Util::Status NVM::Flash::eraseBuffer() {
   return Util::Status::OK;
 }
 
-Util::Status NVM::Flash::writeBuffer(uint32_t addr, const uint8_t * buffer, uint16_t len) {
+Util::Status NVM::Flash::writeBuffer(uint32_t addr, Util::ByteProviderCallback callback, uint16_t len) {
   if (len > TargetConfig::FLASH_PAGE_SIZE) {
     return Util::Status::INVALID_LENGTH;
   }
@@ -168,7 +168,7 @@ Util::Status NVM::Flash::writeBuffer(uint32_t addr, const uint8_t * buffer, uint
   PDI::Instruction::st4(PDI::PtrMode::DIRECT, addr);
 
   // Write `len` bytes using the auto-increment mode.
-  PDI::Instruction::bulkSt12(PDI::PtrMode::INDIRECT_INCR, buffer, len);
+  PDI::Instruction::bulkSt12(PDI::PtrMode::INDIRECT_INCR, callback, len);
 
   return Util::Status::OK;
 }
@@ -220,22 +220,21 @@ Util::Status NVM::Flash::writePageFromBuffer(uint32_t addr, bool preErase, NVM::
   return Util::Status::OK;
 }
 
-Util::Status NVM::Flash::writePage(uint32_t addr, const uint8_t * buffer, uint16_t len, bool preErase, NVM::Flash::Section section) {
+Util::Status NVM::Flash::writePage(uint32_t addr, Util::ByteProviderCallback callback, uint16_t len, bool preErase, NVM::Flash::Section section) {
   Util::Status status;
   status = NVM::Flash::eraseBuffer();
   if (status != Util::Status::OK) { return status; }
-  status = NVM::Flash::writeBuffer(addr, buffer, len);
+  status = NVM::Flash::writeBuffer(addr, callback, len);
   if (status != Util::Status::OK) { return status; }
   return NVM::Flash::writePageFromBuffer(addr, preErase, section);
 }
 
-Util::Status NVM::Flash::write(uint32_t addr, const uint8_t * buffer, uint16_t len, bool preErase, NVM::Flash::Section section) {
+Util::Status NVM::Flash::write(uint32_t addr, Util::ByteProviderCallback callback, uint16_t len, bool preErase, NVM::Flash::Section section) {
   while (len) {
     uint16_t chunkLen = Util::min(len, TargetConfig::FLASH_PAGE_SIZE);
-    Util::Status status = NVM::Flash::writePage(addr, buffer, chunkLen, preErase, section);
+    Util::Status status = NVM::Flash::writePage(addr, callback, chunkLen, preErase, section);
     if (status != Util::Status::OK) { return status; }
     addr += (uint32_t) chunkLen;
-    buffer += chunkLen;
     len -= chunkLen;
   }
   return Util::Status::OK;
