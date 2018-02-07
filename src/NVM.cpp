@@ -9,12 +9,11 @@ void NVM::init() {
   PDI::init();
 }
 
-Util::Status NVM::begin() {
+void NVM::begin() {
   PDI::begin();
   PDI::enterResetState();
   PDI::setGuardTime(PDI::GuardTime::_32);
   PDI::Instruction::key();
-  return NVM::Controller::waitWhileBusy();
 }
 
 static Util::Status exitResetAndWait() {

@@ -5,7 +5,7 @@
 
 namespace NVM {
   void init();
-  Util::Status begin();
+  void begin();
   void end();
 
   namespace Controller {
