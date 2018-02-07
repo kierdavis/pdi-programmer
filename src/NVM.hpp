@@ -54,7 +54,7 @@ namespace NVM {
     uint32_t regAddr(Reg reg);
     void writeReg(Reg reg, uint8_t data);
     void writeCmd(Cmd cmd);
-    void cmdex();
+    void writeCmdex();
 
     Util::Status waitWhileBusy();
   }
