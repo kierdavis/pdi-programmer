@@ -126,9 +126,21 @@ Util::Status NVM::eraseChip() {
   return Util::Status::OK;
 }
 
-Util::Status NVM::Flash::eraseSection(uint32_t addr, NVM::Flash::Section section) {
+static uint32_t realFlashAddr(uint32_t flashAddr, NVM::Flash::Section section) {
+  using NVM::Flash::Section;
+
+  switch (section) {
+    case Section::APP:  { return TargetConfig::FLASH_APP_START + flashAddr; }
+    case Section::BOOT: { return TargetConfig::FLASH_BOOT_START + flashAddr; }
+    default:            { return TargetConfig::FLASH_START + flashAddr; }
+  }
+}
+
+Util::Status NVM::Flash::eraseSection(uint32_t flashAddr, NVM::Flash::Section section) {
   using NVM::Controller::Cmd;
   using NVM::Flash::Section;
+
+  uint32_t addr = realFlashAddr(flashAddr, section);
 
   Cmd cmd;
   switch (section) {
@@ -153,10 +165,12 @@ Util::Status NVM::Flash::eraseBuffer() {
   return Util::Status::OK;
 }
 
-Util::Status NVM::Flash::writeBuffer(uint32_t addr, Util::ByteProviderCallback callback, uint16_t len) {
+Util::Status NVM::Flash::writeBuffer(uint32_t flashAddr, Util::ByteProviderCallback callback, uint16_t len, NVM::Flash::Section section) {
   if (len > TargetConfig::FLASH_PAGE_SIZE) {
     return Util::Status::INVALID_LENGTH;
   }
+
+  uint32_t addr = realFlashAddr(flashAddr, section);
 
   Util::Status status = NVM::Controller::waitWhileBusy();
   if (status != Util::Status::OK) { return status; }
@@ -172,9 +186,11 @@ Util::Status NVM::Flash::writeBuffer(uint32_t addr, Util::ByteProviderCallback c
   return Util::Status::OK;
 }
 
-Util::Status NVM::Flash::erasePage(uint32_t addr, NVM::Flash::Section section) {
+Util::Status NVM::Flash::erasePage(uint32_t flashAddr, NVM::Flash::Section section) {
   using NVM::Controller::Cmd;
   using NVM::Flash::Section;
+
+  uint32_t addr = realFlashAddr(flashAddr, section);
 
   Cmd cmd;
   switch (section) {
@@ -191,9 +207,11 @@ Util::Status NVM::Flash::erasePage(uint32_t addr, NVM::Flash::Section section) {
   return Util::Status::OK;
 }
 
-Util::Status NVM::Flash::writePageFromBuffer(uint32_t addr, bool preErase, NVM::Flash::Section section) {
+Util::Status NVM::Flash::writePageFromBuffer(uint32_t flashAddr, bool preErase, NVM::Flash::Section section) {
   using NVM::Controller::Cmd;
   using NVM::Flash::Section;
+
+  uint32_t addr = realFlashAddr(flashAddr, section);
 
   Cmd cmd;
   if (preErase) {
@@ -219,27 +237,29 @@ Util::Status NVM::Flash::writePageFromBuffer(uint32_t addr, bool preErase, NVM::
   return Util::Status::OK;
 }
 
-Util::Status NVM::Flash::writePage(uint32_t addr, Util::ByteProviderCallback callback, uint16_t len, bool preErase, NVM::Flash::Section section) {
+Util::Status NVM::Flash::writePage(uint32_t flashAddr, Util::ByteProviderCallback callback, uint16_t len, bool preErase, NVM::Flash::Section section) {
   Util::Status status;
   status = NVM::Flash::eraseBuffer();
   if (status != Util::Status::OK) { return status; }
-  status = NVM::Flash::writeBuffer(addr, callback, len);
+  status = NVM::Flash::writeBuffer(flashAddr, callback, len, section);
   if (status != Util::Status::OK) { return status; }
-  return NVM::Flash::writePageFromBuffer(addr, preErase, section);
+  return NVM::Flash::writePageFromBuffer(flashAddr, preErase, section);
 }
 
-Util::Status NVM::Flash::write(uint32_t addr, Util::ByteProviderCallback callback, uint16_t len, bool preErase, NVM::Flash::Section section) {
+Util::Status NVM::Flash::write(uint32_t flashAddr, Util::ByteProviderCallback callback, uint16_t len, bool preErase, NVM::Flash::Section section) {
   while (len) {
     uint16_t chunkLen = Util::min(len, TargetConfig::FLASH_PAGE_SIZE);
-    Util::Status status = NVM::Flash::writePage(addr, callback, chunkLen, preErase, section);
+    Util::Status status = NVM::Flash::writePage(flashAddr, callback, chunkLen, preErase, section);
     if (status != Util::Status::OK) { return status; }
-    addr += (uint32_t) chunkLen;
+    flashAddr += (uint32_t) chunkLen;
     len -= chunkLen;
   }
   return Util::Status::OK;
 }
 
-Util::Status NVM::Fuse::write(uint32_t addr, uint8_t data) {
+Util::Status NVM::Fuse::write(uint8_t fuseAddr, uint8_t data) {
+  uint32_t addr = TargetConfig::FUSE_START + ((uint32_t) fuseAddr);
+
   Util::Status status = NVM::Controller::waitWhileBusy();
   if (status != Util::Status::OK) { return status; }
 
