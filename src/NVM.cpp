@@ -40,8 +40,7 @@ void NVM::end() {
 }
 
 uint32_t NVM::Controller::regAddr(NVM::Controller::Reg reg) {
-  static constexpr uint32_t BASE_ADDR = 0x010001C0;
-  return BASE_ADDR + ((uint32_t) reg);
+  return TargetConfig::NVM_REGS_START + ((uint32_t) reg);
 }
 
 void NVM::Controller::writeReg(NVM::Controller::Reg reg, uint8_t data) {
