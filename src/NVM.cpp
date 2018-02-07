@@ -57,6 +57,11 @@ void NVM::Controller::writeCmdex() {
   NVM::Controller::writeReg(NVM::Controller::Reg::CTRLA, CMDEX_MASK);
 }
 
+void NVM::Controller::execCmd(NVM::Controller::Cmd cmd) {
+  NVM::Controller::writeCmd(cmd);
+  NVM::Controller::writeCmdex();
+}
+
 static Util::Status waitWhileBusBusy() {
   static constexpr uint8_t NVMEN_MASK = 0x02;
 
