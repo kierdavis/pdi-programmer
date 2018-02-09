@@ -105,3 +105,27 @@ void Platform::TargetSerial::writeData(uint8_t data) {
 uint8_t Platform::TargetSerial::readData() {
   return UDR1;
 }
+
+void Platform::ClientSerial::init() {
+  static const uint32_t BAUD = 57600;
+  UBRR0H = (F_CPU/(BAUD*16L)-1) >> 8;
+  UBRR0L = (F_CPU/(BAUD*16L)-1);
+  UCSR0B = _BV(RXEN0) | _BV(TXEN0);
+  UCSR0C = _BV(UCSZ00) | _BV(UCSZ01);
+}
+
+bool Platform::ClientSerial::rxComplete() {
+  return UCSR0A & _BV(RXC0);
+}
+
+bool Platform::ClientSerial::txBufferEmpty() {
+  return UCSR0A & _BV(UDRE0);
+}
+
+void Platform::ClientSerial::writeData(uint8_t data) {
+  UDR0 = data;
+}
+
+uint8_t Platform::ClientSerial::readData() {
+  return UDR0;
+}

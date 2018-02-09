@@ -30,6 +30,14 @@ namespace Platform {
     void writeData(uint8_t data);
     uint8_t readData();
   }
+
+  namespace ClientSerial {
+    void init();
+    bool rxComplete();
+    bool txBufferEmpty();
+    void writeData(uint8_t data);
+    uint8_t readData();
+  }
 }
 
 #endif
