@@ -19,13 +19,10 @@ static const uint8_t CLK_MASK = _BV(CLK_INDEX);
 static const uint8_t TXD_MASK = _BV(TXD_INDEX);
 static const uint8_t RXD_MASK = _BV(RXD_INDEX);
 
-static uint8_t pinMask(PDIPin pin) {
-  switch (pin) {
-    case PDIPin::CLK: return CLK_MASK;
-    case PDIPin::TXD: return TXD_MASK;
-    case PDIPin::RXD: return RXD_MASK;
-    default:          return 0; // unreachable
-  }
+static constexpr uint8_t pinMask(const PDIPin pin) {
+  return (pin == PDIPin::CLK) ? CLK_MASK :
+         (pin == PDIPin::TXD) ? TXD_MASK :
+         (pin == PDIPin::RXD) ? RXD_MASK : 0;
 }
 
 void Platform::Pin::configureAsOutput(PDIPin pin, bool initialState) {
