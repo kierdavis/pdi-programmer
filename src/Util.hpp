@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 namespace Util {
-  static uint16_t min(uint16_t x, uint16_t y) {
+  static constexpr uint16_t min(const uint16_t x, const uint16_t y) {
     return (x < y) ? x : y;
   }
 
@@ -24,7 +24,7 @@ namespace Util {
     bool data;
     MaybeBool(Status status_ = Status::UNKNOWN_ERROR, uint8_t data_ = false)
       : status(status_), data(data_) {}
-    bool ok() { return status == Status::OK; }
+    bool ok() const { return status == Status::OK; }
   };
 
   class MaybeUint8 {
@@ -33,7 +33,7 @@ namespace Util {
     uint8_t data;
     MaybeUint8(Status status_ = Status::UNKNOWN_ERROR, uint8_t data_ = 0)
       : status(status_), data(data_) {}
-    bool ok() { return status == Status::OK; }
+    bool ok() const { return status == Status::OK; }
   };
 
   typedef uint8_t (*ByteProviderCallback)();

@@ -55,16 +55,16 @@ namespace NVM {
       READEEPROM             = 0x06,
     };
 
-    uint32_t regAddr(Reg reg);
-    void writeReg(Reg reg, uint8_t data);
-    void writeCmd(Cmd cmd);
+    uint32_t regAddr(const Reg reg);
+    void writeReg(const Reg reg, const uint8_t data);
+    void writeCmd(const Cmd cmd);
     void writeCmdex();
-    void execCmd(Cmd cmd);
+    void execCmd(const Cmd cmd);
 
     Util::Status waitWhileBusy();
   }
 
-  Util::Status read(uint32_t addr, uint8_t * buffer, uint16_t len);
+  Util::Status read(const uint32_t addr, uint8_t * const buffer, const uint16_t len);
 
   Util::Status eraseChip();
 
@@ -75,17 +75,17 @@ namespace NVM {
       BOOT,
     };
 
-    Util::Status eraseSection(uint32_t flashAddr, Section section);
+    Util::Status eraseSection(const uint32_t flashAddr, const Section section);
     Util::Status eraseBuffer();
-    Util::Status writeBuffer(uint32_t flashAddr, Util::ByteProviderCallback callback, uint16_t len, NVM::Flash::Section section = Section::UNSPECIFIED);
-    Util::Status erasePage(uint32_t flashAddr, Section section = Section::UNSPECIFIED);
-    Util::Status writePageFromBuffer(uint32_t flashAddr, bool preErase = false, Section section = Section::UNSPECIFIED);
-    Util::Status writePage(uint32_t flashAddr, Util::ByteProviderCallback callback, uint16_t len, bool preErase = false, Section section = Section::UNSPECIFIED);
-    Util::Status write(uint32_t flashAddr, Util::ByteProviderCallback callback, uint16_t len, bool preErase = false, Section section = Section::UNSPECIFIED);
+    Util::Status writeBuffer(const uint32_t flashAddr, const Util::ByteProviderCallback callback, const uint16_t len, const NVM::Flash::Section section = Section::UNSPECIFIED);
+    Util::Status erasePage(const uint32_t flashAddr, const Section section = Section::UNSPECIFIED);
+    Util::Status writePageFromBuffer(const uint32_t flashAddr, const bool preErase = false, const Section section = Section::UNSPECIFIED);
+    Util::Status writePage(const uint32_t flashAddr, const Util::ByteProviderCallback callback, const uint16_t len, const bool preErase = false, const Section section = Section::UNSPECIFIED);
+    Util::Status write(const uint32_t flashAddr, const Util::ByteProviderCallback callback, const uint16_t len, const bool preErase = false, const Section section = Section::UNSPECIFIED);
   }
 
   namespace Fuse {
-    Util::Status write(uint8_t fuseAddr, uint8_t data);
+    Util::Status write(const uint8_t fuseAddr, const uint8_t data);
   }
 }
 

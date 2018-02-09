@@ -96,7 +96,7 @@ void PDI::end() {
   Platform::Pin::configureAsInput(PDIPin::RXD);
 }
 
-void PDI::Link::send(uint8_t byte) {
+void PDI::Link::send(const uint8_t byte) {
   ensureTransmitMode();
 
   while (!Platform::TargetSerial::txBufferEmpty()) {}
@@ -104,14 +104,14 @@ void PDI::Link::send(uint8_t byte) {
   Platform::TargetSerial::writeData(byte);
 }
 
-void PDI::Link::send2(uint16_t word) {
-  uint8_t * const bytes = (uint8_t *) &word;
+void PDI::Link::send2(const uint16_t word) {
+  const uint8_t * const bytes = (const uint8_t *) &word;
   PDI::Link::send(bytes[0]);
   PDI::Link::send(bytes[1]);
 }
 
-void PDI::Link::send4(uint32_t word) {
-  uint8_t * const bytes = (uint8_t *) &word;
+void PDI::Link::send4(const uint32_t word) {
+  const uint8_t * const bytes = (const uint8_t *) &word;
   PDI::Link::send(bytes[0]);
   PDI::Link::send(bytes[1]);
   PDI::Link::send(bytes[2]);
@@ -122,7 +122,7 @@ static Util::MaybeUint8 getReceivedFrame() {
   if (Platform::TargetSerial::rxError()) {
     return Util::MaybeUint8(Util::Status::SERIAL_ERROR);
   } else {
-    uint8_t data = Platform::TargetSerial::readData();
+    const uint8_t data = Platform::TargetSerial::readData();
     return Util::MaybeUint8(Util::Status::OK, data);
   }
 }
@@ -141,25 +141,25 @@ Util::MaybeUint8 PDI::Link::recv() {
   return Util::MaybeUint8(Util::Status::SERIAL_TIMEOUT);
 }
 
-Util::MaybeUint8 PDI::Instruction::lds41(uint32_t addr) {
+Util::MaybeUint8 PDI::Instruction::lds41(const uint32_t addr) {
   PDI::Link::send(0x0C);
   PDI::Link::send4(addr);
   return PDI::Link::recv();
 }
 
-void PDI::Instruction::sts41(uint32_t addr, uint8_t data) {
+void PDI::Instruction::sts41(const uint32_t addr, const uint8_t data) {
   PDI::Link::send(0x4C);
   PDI::Link::send4(addr);
   PDI::Link::send(data);
 }
 
-Util::MaybeUint8 PDI::Instruction::ld1(PDI::PtrMode pm) {
-  uint8_t pmMask = ((uint8_t) pm) & 0xC;
+Util::MaybeUint8 PDI::Instruction::ld1(const PDI::PtrMode pm) {
+  const uint8_t pmMask = ((uint8_t) pm) & 0xC;
   PDI::Link::send(0x20 | pmMask);
   return PDI::Link::recv();
 }
 
-Util::Status PDI::Instruction::bulkLd12(PDI::PtrMode pm, uint8_t * buffer, uint16_t len) {
+Util::Status PDI::Instruction::bulkLd12(const PDI::PtrMode pm, uint8_t * const buffer, const uint16_t len) {
   // Check for shortcuts.
   if (len == 0) { return Util::Status::OK; }
   if (len == 1) {
@@ -172,7 +172,7 @@ Util::Status PDI::Instruction::bulkLd12(PDI::PtrMode pm, uint8_t * buffer, uint1
   // `len` cannot be 0, so `len - 1` cannot underflow.
   PDI::Instruction::repeat2(len - 1);
   // Send the LD instruction byte.
-  uint8_t pmMask = ((uint8_t) pm) & 0xC;
+  const uint8_t pmMask = ((uint8_t) pm) & 0xC;
   PDI::Link::send(0x20 | pmMask);
   // The target device executes LD `len` times, responding with the same number
   // of bytes.
@@ -184,19 +184,19 @@ Util::Status PDI::Instruction::bulkLd12(PDI::PtrMode pm, uint8_t * buffer, uint1
   return Util::Status::OK;
 }
 
-void PDI::Instruction::st1(PDI::PtrMode pm, uint8_t data) {
-  uint8_t pmMask = ((uint8_t) pm) & 0xC;
+void PDI::Instruction::st1(const PDI::PtrMode pm, const uint8_t data) {
+  const uint8_t pmMask = ((uint8_t) pm) & 0xC;
   PDI::Link::send(0x60 | pmMask);
   PDI::Link::send(data);
 }
 
-void PDI::Instruction::st4(PDI::PtrMode pm, uint32_t data) {
-  uint8_t pmMask = ((uint8_t) pm) & 0xC;
+void PDI::Instruction::st4(const PDI::PtrMode pm, const uint32_t data) {
+  const uint8_t pmMask = ((uint8_t) pm) & 0xC;
   PDI::Link::send(0x63 | pmMask);
   PDI::Link::send4(data);
 }
 
-void PDI::Instruction::bulkSt12(PDI::PtrMode pm, Util::ByteProviderCallback callback, uint16_t len) {
+void PDI::Instruction::bulkSt12(const PDI::PtrMode pm, const Util::ByteProviderCallback callback, const uint16_t len) {
   // Check for shortcuts.
   if (len == 0) { return; }
   if (len != 1) {
@@ -205,34 +205,34 @@ void PDI::Instruction::bulkSt12(PDI::PtrMode pm, Util::ByteProviderCallback call
     PDI::Instruction::repeat2(len - 1);
   }
   // Send the ST instruction byte.
-  uint8_t pmMask = ((uint8_t) pm) & 0xC;
+  const uint8_t pmMask = ((uint8_t) pm) & 0xC;
   PDI::Link::send(0x60 | pmMask);
   // The target device executes ST `len` times, accepting the same number of
   // bytes.
   for (uint16_t i = 0; i < len; i++) {
-    uint8_t byte = callback();
+    const uint8_t byte = callback();
     PDI::Link::send(byte);
   }
 }
 
-Util::MaybeUint8 PDI::Instruction::ldcs(PDI::CSReg reg) {
-  uint8_t regNum = ((uint8_t) reg) & 0xF;
+Util::MaybeUint8 PDI::Instruction::ldcs(const PDI::CSReg reg) {
+  const uint8_t regNum = ((uint8_t) reg) & 0xF;
   PDI::Link::send(0x80 | regNum);
   return PDI::Link::recv();
 }
 
-void PDI::Instruction::stcs(PDI::CSReg reg, uint8_t data) {
-  uint8_t regNum = ((uint8_t) reg) & 0xF;
+void PDI::Instruction::stcs(const PDI::CSReg reg, const uint8_t data) {
+  const uint8_t regNum = ((uint8_t) reg) & 0xF;
   PDI::Link::send(0xC0 | regNum);
   PDI::Link::send(data);
 }
 
-void PDI::Instruction::repeat1(uint8_t count) {
+void PDI::Instruction::repeat1(const uint8_t count) {
   PDI::Link::send(0xA0);
   PDI::Link::send(count);
 }
 
-void PDI::Instruction::repeat2(uint16_t count) {
+void PDI::Instruction::repeat2(const uint16_t count) {
   PDI::Link::send(0xA1);
   PDI::Link::send2(count);
 }
@@ -266,7 +266,7 @@ Util::MaybeBool PDI::inResetState() {
   return Util::MaybeBool(result.status, inResetState);
 }
 
-void PDI::setGuardTime(PDI::GuardTime gt) {
-  uint8_t data = ((uint8_t) gt) & 0x7;
+void PDI::setGuardTime(const PDI::GuardTime gt) {
+  const uint8_t data = ((uint8_t) gt) & 0x7;
   PDI::Instruction::stcs(PDI::CSReg::CTRL, data);
 }

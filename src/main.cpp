@@ -22,7 +22,7 @@ namespace Response {
   static constexpr uint8_t UNKNOWN_ERROR = 0xFF;
 }
 
-static void send(uint8_t data) {
+static void send(const uint8_t data) {
   while (!Platform::ClientSerial::txBufferEmpty()) {}
   Platform::ClientSerial::writeData(data);
 }
@@ -56,7 +56,7 @@ static uint32_t recv4() {
   return u.word;
 }
 
-static uint8_t statusToResponse(Util::Status status) {
+static uint8_t statusToResponse(const Util::Status status) {
   switch (status) {
     case Util::Status::OK: {
       return Response::OK;
@@ -80,7 +80,7 @@ static void ensureNVMInactive() {
   }
 }
 
-static uint8_t dispatch(uint8_t request) {
+static uint8_t dispatch(const uint8_t request) {
   switch (request) {
     case Request::NOP: {
       return Response::OK;

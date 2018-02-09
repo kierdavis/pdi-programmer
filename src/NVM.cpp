@@ -24,7 +24,7 @@ void NVM::begin() {
 static Util::Status exitResetAndWait() {
   while (1) {
     PDI::exitResetState();
-    Util::MaybeBool result = PDI::inResetState();
+    const Util::MaybeBool result = PDI::inResetState();
     if (!result.ok()) {
       return result.status;
     }
@@ -48,16 +48,16 @@ bool NVM::active() {
   return activeFlag;
 }
 
-uint32_t NVM::Controller::regAddr(NVM::Controller::Reg reg) {
+uint32_t NVM::Controller::regAddr(const NVM::Controller::Reg reg) {
   return TargetConfig::NVM_REGS_START + ((uint32_t) reg);
 }
 
-void NVM::Controller::writeReg(NVM::Controller::Reg reg, uint8_t data) {
-  uint32_t addr = NVM::Controller::regAddr(reg);
+void NVM::Controller::writeReg(const NVM::Controller::Reg reg, const uint8_t data) {
+  const uint32_t addr = NVM::Controller::regAddr(reg);
   PDI::Instruction::sts41(addr, data);
 }
 
-void NVM::Controller::writeCmd(NVM::Controller::Cmd cmd) {
+void NVM::Controller::writeCmd(const NVM::Controller::Cmd cmd) {
   NVM::Controller::writeReg(NVM::Controller::Reg::CMD, (uint8_t) cmd);
 }
 
@@ -66,7 +66,7 @@ void NVM::Controller::writeCmdex() {
   NVM::Controller::writeReg(NVM::Controller::Reg::CTRLA, CMDEX_MASK);
 }
 
-void NVM::Controller::execCmd(NVM::Controller::Cmd cmd) {
+void NVM::Controller::execCmd(const NVM::Controller::Cmd cmd) {
   NVM::Controller::writeCmd(cmd);
   NVM::Controller::writeCmdex();
 }
@@ -75,7 +75,7 @@ static Util::Status waitWhileBusBusy() {
   static constexpr uint8_t NVMEN_MASK = 0x02;
 
   while (1) {
-    Util::MaybeUint8 result = PDI::Instruction::ldcs(PDI::CSReg::STATUS);
+    const Util::MaybeUint8 result = PDI::Instruction::ldcs(PDI::CSReg::STATUS);
     if (!result.ok()) {
       return result.status;
     }
@@ -89,12 +89,12 @@ static Util::Status waitWhileControllerBusy() {
   static constexpr uint8_t BUSY_MASK = 0x80;
 
   // Put address of STATUS register into PDI pointer register.
-  uint32_t addr = NVM::Controller::regAddr(NVM::Controller::Reg::STATUS);
+  const uint32_t addr = NVM::Controller::regAddr(NVM::Controller::Reg::STATUS);
   PDI::Instruction::st4(PDI::PtrMode::DIRECT, addr);
 
   // Poll STATUS register until BUSY flag is no longer set.
   while (1) {
-    Util::MaybeUint8 result = PDI::Instruction::ld1(PDI::PtrMode::INDIRECT);
+    const Util::MaybeUint8 result = PDI::Instruction::ld1(PDI::PtrMode::INDIRECT);
     if (!result.ok()) {
       return result.status;
     }
@@ -105,17 +105,17 @@ static Util::Status waitWhileControllerBusy() {
 }
 
 Util::Status NVM::Controller::waitWhileBusy() {
-  Util::Status status = waitWhileBusBusy();
+  const Util::Status status = waitWhileBusBusy();
   if (status != Util::Status::OK) {
     return status;
   }
   return waitWhileControllerBusy();
 }
 
-Util::Status NVM::read(uint32_t addr, uint8_t * buffer, uint16_t len) {
+Util::Status NVM::read(const uint32_t addr, uint8_t * const buffer, const uint16_t len) {
   if (len == 0) { return Util::Status::OK; }
 
-  Util::Status status = NVM::Controller::waitWhileBusy();
+  const Util::Status status = NVM::Controller::waitWhileBusy();
   if (status != Util::Status::OK) { return status; }
 
   NVM::Controller::writeCmd(NVM::Controller::Cmd::READNVM);
@@ -128,14 +128,14 @@ Util::Status NVM::read(uint32_t addr, uint8_t * buffer, uint16_t len) {
 }
 
 Util::Status NVM::eraseChip() {
-  Util::Status status = NVM::Controller::waitWhileBusy();
+  const Util::Status status = NVM::Controller::waitWhileBusy();
   if (status != Util::Status::OK) { return status; }
 
   NVM::Controller::execCmd(NVM::Controller::Cmd::CHIPERASE);
   return Util::Status::OK;
 }
 
-static uint32_t realFlashAddr(uint32_t flashAddr, NVM::Flash::Section section) {
+static uint32_t realFlashAddr(const uint32_t flashAddr, const NVM::Flash::Section section) {
   using NVM::Flash::Section;
 
   switch (section) {
@@ -145,11 +145,11 @@ static uint32_t realFlashAddr(uint32_t flashAddr, NVM::Flash::Section section) {
   }
 }
 
-Util::Status NVM::Flash::eraseSection(uint32_t flashAddr, NVM::Flash::Section section) {
+Util::Status NVM::Flash::eraseSection(const uint32_t flashAddr, const NVM::Flash::Section section) {
   using NVM::Controller::Cmd;
   using NVM::Flash::Section;
 
-  uint32_t addr = realFlashAddr(flashAddr, section);
+  const uint32_t addr = realFlashAddr(flashAddr, section);
 
   Cmd cmd;
   switch (section) {
@@ -158,7 +158,7 @@ Util::Status NVM::Flash::eraseSection(uint32_t flashAddr, NVM::Flash::Section se
     default:            { return Util::Status::INVALID_SECTION; }
   }
 
-  Util::Status status = NVM::Controller::waitWhileBusy();
+  const Util::Status status = NVM::Controller::waitWhileBusy();
   if (status != Util::Status::OK) { return status; }
 
   NVM::Controller::writeCmd(cmd);
@@ -167,21 +167,21 @@ Util::Status NVM::Flash::eraseSection(uint32_t flashAddr, NVM::Flash::Section se
 }
 
 Util::Status NVM::Flash::eraseBuffer() {
-  Util::Status status = NVM::Controller::waitWhileBusy();
+  const Util::Status status = NVM::Controller::waitWhileBusy();
   if (status != Util::Status::OK) { return status; }
 
   NVM::Controller::execCmd(NVM::Controller::Cmd::ERASEFLASHPAGEBUFF);
   return Util::Status::OK;
 }
 
-Util::Status NVM::Flash::writeBuffer(uint32_t flashAddr, Util::ByteProviderCallback callback, uint16_t len, NVM::Flash::Section section) {
+Util::Status NVM::Flash::writeBuffer(const uint32_t flashAddr, const Util::ByteProviderCallback callback, const uint16_t len, const NVM::Flash::Section section) {
   if (len > TargetConfig::FLASH_PAGE_SIZE) {
     return Util::Status::INVALID_LENGTH;
   }
 
-  uint32_t addr = realFlashAddr(flashAddr, section);
+  const uint32_t addr = realFlashAddr(flashAddr, section);
 
-  Util::Status status = NVM::Controller::waitWhileBusy();
+  const Util::Status status = NVM::Controller::waitWhileBusy();
   if (status != Util::Status::OK) { return status; }
 
   NVM::Controller::writeCmd(NVM::Controller::Cmd::LOADFLASHPAGEBUFF);
@@ -195,11 +195,11 @@ Util::Status NVM::Flash::writeBuffer(uint32_t flashAddr, Util::ByteProviderCallb
   return Util::Status::OK;
 }
 
-Util::Status NVM::Flash::erasePage(uint32_t flashAddr, NVM::Flash::Section section) {
+Util::Status NVM::Flash::erasePage(const uint32_t flashAddr, const NVM::Flash::Section section) {
   using NVM::Controller::Cmd;
   using NVM::Flash::Section;
 
-  uint32_t addr = realFlashAddr(flashAddr, section);
+  const uint32_t addr = realFlashAddr(flashAddr, section);
 
   Cmd cmd;
   switch (section) {
@@ -208,7 +208,7 @@ Util::Status NVM::Flash::erasePage(uint32_t flashAddr, NVM::Flash::Section secti
     default:            { cmd = Cmd::ERASEFLASHPAGE; break; }
   }
 
-  Util::Status status = NVM::Controller::waitWhileBusy();
+  const Util::Status status = NVM::Controller::waitWhileBusy();
   if (status != Util::Status::OK) { return status; }
 
   NVM::Controller::writeCmd(cmd);
@@ -216,11 +216,11 @@ Util::Status NVM::Flash::erasePage(uint32_t flashAddr, NVM::Flash::Section secti
   return Util::Status::OK;
 }
 
-Util::Status NVM::Flash::writePageFromBuffer(uint32_t flashAddr, bool preErase, NVM::Flash::Section section) {
+Util::Status NVM::Flash::writePageFromBuffer(const uint32_t flashAddr, const bool preErase, const NVM::Flash::Section section) {
   using NVM::Controller::Cmd;
   using NVM::Flash::Section;
 
-  uint32_t addr = realFlashAddr(flashAddr, section);
+  const uint32_t addr = realFlashAddr(flashAddr, section);
 
   Cmd cmd;
   if (preErase) {
@@ -238,7 +238,7 @@ Util::Status NVM::Flash::writePageFromBuffer(uint32_t flashAddr, bool preErase, 
     }
   }
 
-  Util::Status status = NVM::Controller::waitWhileBusy();
+  const Util::Status status = NVM::Controller::waitWhileBusy();
   if (status != Util::Status::OK) { return status; }
 
   NVM::Controller::writeCmd(cmd);
@@ -246,30 +246,31 @@ Util::Status NVM::Flash::writePageFromBuffer(uint32_t flashAddr, bool preErase, 
   return Util::Status::OK;
 }
 
-Util::Status NVM::Flash::writePage(uint32_t flashAddr, Util::ByteProviderCallback callback, uint16_t len, bool preErase, NVM::Flash::Section section) {
-  Util::Status status;
-  status = NVM::Flash::eraseBuffer();
-  if (status != Util::Status::OK) { return status; }
-  status = NVM::Flash::writeBuffer(flashAddr, callback, len, section);
-  if (status != Util::Status::OK) { return status; }
+Util::Status NVM::Flash::writePage(const uint32_t flashAddr, const Util::ByteProviderCallback callback, const uint16_t len, const bool preErase, const NVM::Flash::Section section) {
+  const Util::Status eraseStatus = NVM::Flash::eraseBuffer();
+  if (eraseStatus != Util::Status::OK) { return eraseStatus; }
+  const Util::Status writeStatus = NVM::Flash::writeBuffer(flashAddr, callback, len, section);
+  if (writeStatus != Util::Status::OK) { return writeStatus; }
   return NVM::Flash::writePageFromBuffer(flashAddr, preErase, section);
 }
 
-Util::Status NVM::Flash::write(uint32_t flashAddr, Util::ByteProviderCallback callback, uint16_t len, bool preErase, NVM::Flash::Section section) {
-  while (len) {
-    uint16_t chunkLen = Util::min(len, TargetConfig::FLASH_PAGE_SIZE);
-    Util::Status status = NVM::Flash::writePage(flashAddr, callback, chunkLen, preErase, section);
+Util::Status NVM::Flash::write(const uint32_t flashAddr, const Util::ByteProviderCallback callback, const uint16_t len, const bool preErase, const NVM::Flash::Section section) {
+  uint32_t currFlashAddr = flashAddr;
+  uint16_t currLen = len;
+  while (currLen) {
+    const uint16_t chunkLen = Util::min(currLen, TargetConfig::FLASH_PAGE_SIZE);
+    const Util::Status status = NVM::Flash::writePage(currFlashAddr, callback, chunkLen, preErase, section);
     if (status != Util::Status::OK) { return status; }
-    flashAddr += (uint32_t) chunkLen;
-    len -= chunkLen;
+    currFlashAddr += (uint32_t) chunkLen;
+    currLen -= chunkLen;
   }
   return Util::Status::OK;
 }
 
-Util::Status NVM::Fuse::write(uint8_t fuseAddr, uint8_t data) {
-  uint32_t addr = TargetConfig::FUSE_START + ((uint32_t) fuseAddr);
+Util::Status NVM::Fuse::write(const uint8_t fuseAddr, const uint8_t data) {
+  const uint32_t addr = TargetConfig::FUSE_START + ((uint32_t) fuseAddr);
 
-  Util::Status status = NVM::Controller::waitWhileBusy();
+  const Util::Status status = NVM::Controller::waitWhileBusy();
   if (status != Util::Status::OK) { return status; }
 
   NVM::Controller::writeCmd(NVM::Controller::Cmd::WRITEFUSE);

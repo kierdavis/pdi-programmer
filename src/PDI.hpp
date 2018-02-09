@@ -15,9 +15,9 @@ namespace PDI {
   void end();
 
   namespace Link {
-    void send(uint8_t byte);
-    void send2(uint16_t word);
-    void send4(uint32_t word);
+    void send(const uint8_t byte);
+    void send2(const uint16_t word);
+    void send4(const uint32_t word);
     Util::MaybeUint8 recv();
   }
 
@@ -34,20 +34,20 @@ namespace PDI {
   };
 
   namespace Instruction {
-    Util::MaybeUint8 lds41(uint32_t addr);
-    void sts41(uint32_t addr, uint8_t data);
+    Util::MaybeUint8 lds41(const uint32_t addr);
+    void sts41(const uint32_t addr, const uint8_t data);
 
-    Util::MaybeUint8 ld1(PtrMode pm);
-    Util::Status bulkLd12(PtrMode pm, uint8_t * buffer, uint16_t len);
-    void st1(PtrMode pm, uint8_t data);
-    void st4(PtrMode pm, uint32_t data);
-    void bulkSt12(PtrMode pm, Util::ByteProviderCallback callback, uint16_t len);
+    Util::MaybeUint8 ld1(const PtrMode pm);
+    Util::Status bulkLd12(const PtrMode pm, uint8_t * const buffer, const uint16_t len);
+    void st1(const PtrMode pm, const uint8_t data);
+    void st4(const PtrMode pm, const uint32_t data);
+    void bulkSt12(const PtrMode pm, const Util::ByteProviderCallback callback, const uint16_t len);
 
-    Util::MaybeUint8 ldcs(CSReg reg);
-    void stcs(CSReg reg, uint8_t data);
+    Util::MaybeUint8 ldcs(const CSReg reg);
+    void stcs(const CSReg reg, const uint8_t data);
 
-    void repeat1(uint8_t count);
-    void repeat2(uint16_t count);
+    void repeat1(const uint8_t count);
+    void repeat2(const uint16_t count);
     void key();
   }
 
@@ -64,7 +64,7 @@ namespace PDI {
   void enterResetState();
   void exitResetState();
   Util::MaybeBool inResetState();
-  void setGuardTime(GuardTime gt);
+  void setGuardTime(const GuardTime gt);
 }
 
 #endif
