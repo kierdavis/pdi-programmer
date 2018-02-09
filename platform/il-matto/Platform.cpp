@@ -31,8 +31,9 @@ void Platform::Pin::configureAsOutput(PDIPin pin, bool initialState) {
 }
 
 void Platform::Pin::configureAsInput(PDIPin pin) {
-  *DDR &= ~pinMask(pin);
-  *PORT &= ~pinMask(pin);
+  const uint8_t mask = pinMask(pin);
+  *DDR &= ~mask;
+  *PORT &= ~mask;
 }
 
 void Platform::Pin::write(PDIPin pin, bool state) {
