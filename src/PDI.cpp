@@ -105,23 +105,17 @@ void PDI::Link::send(uint8_t byte) {
 }
 
 void PDI::Link::send2(uint16_t word) {
-  union {
-    uint16_t word;
-    uint8_t bytes[2];
-  } u = { .word = word };
-  for (uint8_t i = 0; i < 2; i++) {
-    PDI::Link::send(u.bytes[i]);
-  }
+  uint8_t * const bytes = (uint8_t *) &word;
+  PDI::Link::send(bytes[0]);
+  PDI::Link::send(bytes[1]);
 }
 
 void PDI::Link::send4(uint32_t word) {
-  union {
-    uint32_t word;
-    uint8_t bytes[4];
-  } u = { .word = word };
-  for (uint8_t i = 0; i < 4; i++) {
-    PDI::Link::send(u.bytes[i]);
-  }
+  uint8_t * const bytes = (uint8_t *) &word;
+  PDI::Link::send(bytes[0]);
+  PDI::Link::send(bytes[1]);
+  PDI::Link::send(bytes[2]);
+  PDI::Link::send(bytes[3]);
 }
 
 static Util::MaybeUint8 getReceivedFrame() {
