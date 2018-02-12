@@ -1,4 +1,4 @@
-import serial
+import serial, sys
 
 class Timeout(Exception):
   pass
@@ -56,16 +56,18 @@ class PDIProgrammer(object):
     self._check_response()
 
 def main():
+  filename = sys.argv[1]
+  with open(filename, "rb") as f:
+    program = f.read()
+  assert len(program) < 65536, "Programs longer than 64k are not currently supported"
   ser = serial.Serial("/dev/ttyUSB0", 57600, timeout=1)
   try:
     pdi = PDIProgrammer(ser)
     try:
       pdi.erase_chip()
-      pdi.write_app_flash(0, [0x8f, 0xef, 0x80, 0x93, 0x01, 0x06, 0x80, 0x93, 0x07, 0x06, 0xfd, 0xcf])
-      pdi.write_fuse(1, 0xff)
-      pdi.write_fuse(2, 0xff)
-      pdi.write_fuse(4, 0xff)
-      pdi.write_fuse(5, 0xff)
+      pdi.write_app_flash(0, program)
+      for fuse in [1, 2, 4, 5]:
+        pdi.write_fuse(fuse, 0xff)
     finally:
       pdi.close()
   finally:
