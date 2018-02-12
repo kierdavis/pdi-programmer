@@ -28,7 +28,7 @@ class PDIProgrammer(object):
       raise PDIProgrammerError(hex(resp))
 
   def erase_chip(self):
-    self._send(0x04)
+    self._send(0x01)
     self._check_response()
 
   def write_app_flash(self, addr, buf):

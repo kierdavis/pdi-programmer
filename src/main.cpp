@@ -7,9 +7,9 @@
 
 namespace Request {
   static constexpr uint8_t NOP = 0x00;
+  static constexpr uint8_t ERASE_CHIP = 0x01;
   static constexpr uint8_t WRITE_APP_FLASH = 0x02;
   static constexpr uint8_t WRITE_FUSE = 0x03;
-  static constexpr uint8_t ERASE_CHIP = 0x04;
   static constexpr uint8_t END = 0xFF;
 }
 
