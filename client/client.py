@@ -1,4 +1,4 @@
-import serial, sys
+import serial, sys, time
 
 class Timeout(Exception):
   pass
@@ -51,6 +51,15 @@ class PDIProgrammer(object):
     self._send(data)
     self._check_response()
 
+  def sync(self):
+    t = time.time()
+    while time.time() - t < 2.0:
+      self._send(0x56)
+      resp = self._recv()
+      if resp == 0xA9:
+        return
+    raise PDIProgrammerError("could not establish sync")
+
   def close(self):
     self._send(0xFF)
     self._check_response()
@@ -64,10 +73,13 @@ def main():
   try:
     pdi = PDIProgrammer(ser)
     try:
+      pdi.sync()
       pdi.erase_chip()
       pdi.write_app_flash(0, program)
+      pdi.sync()
       for fuse in [1, 2, 4, 5]:
         pdi.write_fuse(fuse, 0xff)
+      pdi.sync()
     finally:
       pdi.close()
   finally:
