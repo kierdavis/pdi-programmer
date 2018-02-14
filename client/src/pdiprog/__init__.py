@@ -19,9 +19,27 @@ class PDIProgrammer(object):
       raise PDIProgrammerError("timed out while waiting for acknowledgement")
     return ord(resp)
 
-  def _check_response(self):
+  def sync(self):
+    old_timeout = self.ser.timeout
+    self.ser.timeout = 0.05
+    ok = False
+    for i in range(40):
+      try:
+        self._send(0x59)
+        self._check_response(0xA6)
+        ok = True
+        break
+      except PDIProgrammerError:
+        # Blash it with NULLs since it's probably waiting for input from us.
+        self.ser.write("\x00" * 32)
+        self.ser.read(1024)
+    self.ser.timeout = old_timeout
+    if not ok:
+      raise PDIProgrammerError("failed to synchronise with programmer")
+
+  def _check_response(self, expect=0x00):
     resp = self._recv()
-    if resp != 0:
+    if resp != expect:
       raise PDIProgrammerError(hex(resp))
 
   def erase_chip(self):
@@ -60,6 +78,8 @@ def main():
   try:
     pdi = PDIProgrammer(ser)
     try:
+      print "Synchronising..."
+      pdi.sync()
       print "Erasing chip..."
       pdi.erase_chip()
       addr = 0

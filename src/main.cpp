@@ -10,6 +10,7 @@ namespace Request {
   static constexpr uint8_t ERASE_CHIP = 0x01;
   static constexpr uint8_t WRITE_APP_FLASH = 0x02;
   static constexpr uint8_t WRITE_FUSE = 0x03;
+  static constexpr uint8_t SYNC = 0x59;
   static constexpr uint8_t END = 0xFF;
 }
 
@@ -17,6 +18,8 @@ namespace Response {
   static constexpr uint8_t OK = 0x00;
 
   static constexpr uint8_t INVALID_REQUEST = 0x01;
+
+  static constexpr uint8_t SYNC = 0xA6;
 
   static constexpr uint8_t INTERNAL_ERROR = 0xFE;
   static constexpr uint8_t UNKNOWN_ERROR = 0xFF;
@@ -106,6 +109,9 @@ static uint8_t dispatch(const uint8_t request) {
       const uint8_t data = recv();
       ensureNVMActive();
       return statusToResponse(NVM::Fuse::write(addr, data));
+    }
+    case Request::SYNC: {
+      return Response::SYNC;
     }
     case Request::END: {
       ensureNVMInactive();
