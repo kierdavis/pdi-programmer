@@ -63,10 +63,12 @@ def main():
       print "Erasing chip..."
       pdi.erase_chip()
       addr = 0
+      total = len(program)
       while len(program):
         chunk = program[:1024]
         program = program[len(chunk):]
-        print "Writing %d bytes at address %06Xh (%d bytes left after this)..." % (len(chunk), addr, len(program))
+        perc = (addr * 100) / total
+        print "Writing %d bytes at address %06Xh (%d%% complete)" % (len(chunk), addr, perc)
         pdi.write_app_flash(addr, chunk)
         addr += len(chunk)
       print "Writing fuses..."
