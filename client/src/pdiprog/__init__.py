@@ -16,7 +16,7 @@ class PDIProgrammer(object):
   def _recv(self):
     resp = self.ser.read(1)
     if len(resp) == 0:
-      raise Timeout
+      raise PDIProgrammerError("timed out while waiting for acknowledgement")
     return ord(resp)
 
   def _check_response(self):
