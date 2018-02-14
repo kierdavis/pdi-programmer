@@ -56,17 +56,28 @@ def main():
   filename = sys.argv[1]
   with open(filename, "rb") as f:
     program = f.read()
-  assert len(program) < 65536, "Programs longer than 64k are not currently supported"
   ser = serial.Serial("/dev/ttyUSB0", 57600, timeout=1)
   try:
     pdi = PDIProgrammer(ser)
     try:
+      print "Erasing chip..."
       pdi.erase_chip()
-      pdi.write_app_flash(0, program)
+      addr = 0
+      while len(program):
+        chunk = program[:1024]
+        program = program[len(chunk):]
+        print "Writing %d bytes at address %06Xh (%d bytes left after this)..." % (len(chunk), addr, len(program))
+        pdi.write_app_flash(addr, chunk)
+        addr += len(chunk)
+      print "Writing fuses..."
       for fuse in [1, 2, 4, 5]:
         pdi.write_fuse(fuse, 0xff)
+      print "Done."
     finally:
-      pdi.close()
+      try:
+        pdi.close()
+      except PDIProgrammerError:
+        pass
   finally:
     ser.close()
 
