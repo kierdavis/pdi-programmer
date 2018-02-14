@@ -1,8 +1,5 @@
 import serial, sys
 
-class Timeout(Exception):
-  pass
-
 class PDIProgrammerError(Exception):
   pass
 
@@ -14,7 +11,7 @@ class PDIProgrammer(object):
     self.ser.write(chr(byte & 0xFF))
     ack = self.ser.read(1)
     if len(ack) == 0:
-      raise Timeout
+      raise PDIProgrammerError("timed out while waiting for acknowledgement")
 
   def _recv(self):
     resp = self.ser.read(1)
