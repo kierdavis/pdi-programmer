@@ -85,7 +85,7 @@ def main():
       addr = 0
       total = len(program)
       while len(program):
-        chunk = program[:1024]
+        chunk = program[:512]
         program = program[len(chunk):]
         perc = (addr * 100) / total
         print "Writing %d bytes at address %06Xh (%d%% complete)" % (len(chunk), addr, perc)
